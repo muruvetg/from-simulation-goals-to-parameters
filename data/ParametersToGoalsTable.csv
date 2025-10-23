@@ -1,0 +1,288 @@
+Goal Groups,Goal,SimuBridge Parameter Change,Paper,Description of Paper,Notes,Test Questions,Prompt 1 Answers,Result Accepted / Not Accepted - 1,Prompt 2 Answers,Result Accepted / Not Accepted - 2
+,,,,,,,,,,
+Waiting Time Related Goals,Reduce waiting time,"Change resource assignment, Reduce resource",16,"Maass et al. (2021) developed a discrete event simulation model for a Mayo Clinic CT department serving emergency, inpatient, and outpatient patients competing for six unique CT machines. Using a real-world case study of ED CT access delays, the researchers tested three operational interventions: adding dedicated patient transporters (1-2 staff), implementing faster creatinine lab testing, and assigning a dedicated nurse to monitor patient readiness. Simulation parameters included arrival rates (varying by patient type, time of day, and day of week), resource capacity (CT machines, transporters, holding bays), processing times (scan duration, image processing, equipment cleaning), patient prioritization rules (trauma/stroke patients highest priority), and resource-activity assignments (matching patients to compatible machines). The results demonstrated that adding one dedicated transporter achieved a 10-minute reduction in ED CT access times and the organization successfully realized these predicted improvements in practice, achieving 80% compliance with their 30-minute access goal and meeting the 25-minute stroke imaging guideline. This case study illustrates how simulation parameters derived from process analysis can be systematically adjusted to achieve specific management objectives in complex healthcare environments with multiple competing patient demands.",,,,,,
+Reducing Cost Related Goals,Minimize operational costs,"Reduce number of staff (if there is any cost on) 
+Reduce working shifts",16,,"Reduce working times of Role 3, resulted cost increase. Why ? The in use hours for resource increased. Same process took longer time and cost increased",,,,,
+Reduce Processing time Related Goals,Reduce lab processing time for patients,Reduce processing time of any activity,16,,,,,,,
+,,,,,,,,,,
+Increasing Processing Capacity Related Goals,Increase processing capacity,Increase number of resources,15,"Rezeq et al. (2024) developed a hybrid simulation-optimization approach for relief-aid distribution planning by addressing congestion at security checkpoints in humanitarian supply networks. Using the Kerem Abu Salem checkpoint between Israel and Gaza as a real-world case study, the researchers applied business process reengineering (BPR) to redesign the current security checkpoint process. The results demonstrated that Scenario 6 (combining all redesign improvements including electronic queue management, IT-based document processing, portable scanning equipment, extended working hours, and increased staffing) achieved a 90% reduction in security checkpoint cycle time and 28% reduction in distribution costs compared to the AS-IS model. This case study illustrates how simulation parameters (staffing levels, process times, resource allocation) derived from process reengineering can be systematically translated into quantifiable performance metrics and incorporated into optimization models to achieve specific management objectives in complex, congestion-prone environments.",,,,,,
+Increasing Processing Capacity Related Goals,Handle greatest number of trucks,Increase working hours,15,,,,,,,
+Waiting Time Related Goals,Reduce average waiting time at security checkpoint,"Electronic queue management system added
+Queue management / activity duration",15,,Observed waiting time reduced ,,,,,
+Waiting Time Related Goals,Reduce time-consuming manual processes,Reduce activity processing time,15,,,,,,,
+,,,,,,,,,,
+Waiting Time Related Goals,Reduce patient waiting times,Decrease resource count. Tester number reduced from 6 to 4,14,"Zeinali et al. (2015) developed a simulation-based metamodeling approach for resource planning in emergency departments. The study created a discrete event simulation model of an Iranian hospital's emergency department, then built metamodels to approximate the relationship between simulation inputs (number of receptionists, nurses, residents, and beds) and outputs (total patient waiting time). By testing multiple resource configurations via simulation and using metamodels to efficiently explore the solution space, they identified that reducing nurses from 3 to 2 and adding one resident—while maintaining budget constraints—achieved a 48% reduction in average patient waiting times (from 44 to 23 minutes).",,,,,,
+Waiting Time Related Goals,Reduce patient waiting times,Change Routing probability / distribution,14,,,,,,,
+Increasing Processing Capacity Related Goals,Relieve congestion and improve patient flow,Increase number of resources,14,,,,,,,
+,,,,,,,,,,
+Reduce Processing time Related Goals,Reduce Processing Time,Increase resources,8,"Mahendra et al. (2024) evaluated and improved the Electronic Traffic Law Enforcement (ETLE) business process at an Indonesian Regional Police Traffic Directorate. They interviewed officers to assess capability levels, revealing a gap between current (Level 2) and target (Level 3) capability. In the improvement phase, they identified that insufficient computer resources and inflexible validation procedures were key bottlenecks limiting validation productivity. They developed seven improvement scenarios: Improvement I (resource adjustment: adding computers and extending work hours) achieved 200.42% productivity increase with 6.94% validation rate; Improvement II (resource adjustment plus allowing same-day validation) achieved 424.74% productivity increase with 12.1% validation rate. This study demonstrates how simulation parameters (staffing, computer availability, working hours, validation period rules) directly map to operational management objectives (validation productivity, processing rate)",,,,,,
+,,,,,,,,,,
+Increasing Processing Capacity Related Goals,Increase production capacity slightly and reduce waste time,Decrease processing time,7,"Czvetko et al. (2021) developed a data-driven business process management (BPM) methodology integrated with Industry 4.0 technologies to redesign a CNC production line at a Hungarian assembly company. Using a real-world case study to transform a conventional manufacturing plant into a fully automated ""smart"" factory unit, the researchers identified key simulation parameters including processing times (CNC milling duration, operator-dependent variations), resource capacity (number of CNC machines, programmers, operators, cutting machines), arrival rates and scheduling requirements, operator utilization rates, and walking/transportation times. Three process improvement scenarios were tested through BPMN-based simulation: eliminating CAM program writing by operators, enabling operators to manage multiple CNC machines simultaneously, and introducing automated guided vehicles (AGVs) for material transport. The results demonstrated that Scenario 2 achieved a 40% increase in production capacity by reassigning resources more efficiently, while prediction models reduced estimation errors. ",,,,,,
+Increasing Processing Capacity Related Goals,Increased the quantity produced per shift,"Change resource activity assignments, Role3 and 2 -> Role4",7,,"Cycle time decreased, waiting time decreased. Means more cases can be handled. ",,,,,
+,,,,,,,,,,
+Waiting Time Related Goals,Reduce time-consuming call handling,Decrease call arrival rate or event generation rate,6,"Pereira et al. (2021) made a case study to improve the incident management (IM) process at a multinational company's IT support service. The researchers systematically analyzed the current process to identify five performance issues affecting processing time. Using simulation modeling, they tested four different redesign scenarios by applying specific BPM heuristics (activity elimination, activity automation, and integral technology). The analysis revealed that the optimal configuration—eliminating phone-based incident entry, automating all first-level support activities through system upgrade, and centralizing email as the single entry point—achieved a 10.7% reduction in second-level support processing time and eliminated 100% of first-level support processing time. This case study demonstrates how simulation parameters (activity automation, routing rules, system capabilities) directly correlate with management objectives (time reduction, error elimination).","Refers to decreasing unnecessary event arrival
+Observed waiting time reduced ",,,,,
+Waiting Time Related Goals,Improve time performance,Reduce processing time,6,,,,,,,
+Waiting Time Related Goals,Reduce processing time,Reduce processing time for any activity,6,,,,,,,
+,,,,,,,,,,
+Increasing Processing Capacity Related Goals,Improve patient access & autonomy,Add more available hours,2,"Braaksma et al. (2017) developed a reusable simulation model to evaluate implementing a combined walk-in and appointment system for CT-scan facilities. The study used discrete event simulation to test multiple scenarios at the Academic Medical Center in Amsterdam, examining performance indicators like access time, waiting time, and resource utilization. They systematically varied simulation parameters including the number of available scanners, appointment scheduling strategies, patient arrival rates, and walk-in tolerance levels to identify which parameter configurations best achieved management goals such as reducing patient access time from 4.7 days to under one day. The research demonstrates that simulation parameters directly drive performance outcomes and provides a practical methodology for translating operational objectives into specific parameter settings",,,,,,
+Improving Resource Utilisation Related Goals,Optimize resource utilization & reduce waste,Can be related to inter arrival time,2,,Workload increased with optimised version. Because cases arrived more often,,,,,
+Improving Resource Utilisation Related Goals,Optimize resource allocation & capacity,CT scanner can mapped to resource,2,,"Reduced working schedule for Role 1, workload increased from %71 to 97%",,,,,
+,,,,,,,,,,
+Increasing Processing Capacity Related Goals,Increase throughput,Add more available hours,4,"Al-Hawari et al. (2022) developed a framework to optimize educational dentistry clinics in Jordan. The study tested multiple simulation scenarios combining different parameters: appointment scheduling rules, orthodontist work schedules, receptionist staffing, and patient flow paths. They used design of experiments and their effects on performance measures (patient waiting times, length of stay, resource utilization, and throughput). Results showed that the optimal configuration reduced orthodontic patient waiting times by 37.74% and length of stay by 29.44%, while increasing patient throughput by 69.39%. ",,,,,,
+Improving Resource Utilisation Related Goals,Improve resource utilization,Increase/Decrease role working capacity,4,,,,,,,
+Improving Resource Utilisation Related Goals,Increase receptionist utilization,Increase/Decrease resources,4,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+Test Units,,,,,,,,,,
+,,,,,,,,,,
+Waiting Time Related Goals,Reduce patient waiting times,"Change activity arrival rate / inter-arrival time 
+For Rule 0 : Set Inter Arrival : exponential - 5 min
+For Rule 1: Set Inter Arrival : constant - 15 min",4,"Al-Hawari et al. (2022) developed a framework to optimize educational dentistry clinics in Jordan. The study tested multiple simulation scenarios combining different parameters: appointment scheduling rules, orthodontist work schedules, receptionist staffing, and patient flow paths. They used design of experiments and their effects on performance measures (patient waiting times, length of stay, resource utilization, and throughput). Results showed that the optimal configuration reduced orthodontic patient waiting times by 37.74% and length of stay by 29.44%, while increasing patient throughput by 69.39%. ",Waiting time reduced for 15 min inter arrival,"We're running a busy dental clinic and patients are complaining about long waiting times. The clinic has variable patient arrivals throughout the day—some hours are packed while others are quiet. How can we reduce waiting times?
+","Based on your goal to reduce waiting times in your dental clinic, I found two relevant approaches from research:
+
+Recommended Parameter: Change resource assignment
+
+What to modify: Consider adjusting the number of available dental staff based on peak and off-peak hours. For instance, increasing the number of dental hygienists or providers during busy periods can help manage patient load effectively.
+Expected outcome: Research indicates that optimizing resource allocation during high-demand periods can lead to substantial reductions in patient waiting times, as more patients can be attended to simultaneously.
+
+Recommended Parameter: Implement an electronic queue management system
+
+What to modify: Introduce a system that manages patient flow more efficiently by notifying patients of their wait times and allowing them to queue remotely if possible.
+Expected outcome: Studies have shown that electronic queue management systems can significantly reduce perceived waiting times, as patients feel more informed and engaged about their wait, alleviating anxiety and frustration.
+Questions to refine recommendation:
+
+What are the current staffing levels during peak and off-peak hours?
+Are there any existing systems in place to manage patient arrivals and scheduling?",Expected Valid Answer,"To address the long waiting times in your busy dental clinic, a few strategies could be effective based on similar goals and successful interventions in other healthcare settings:
+
+Change Resource Assignments: Adjusting the number of staff or their roles can significantly reduce waiting times. For example, if you have multiple receptionists or dental assistants, consider their distribution and whether their duties can be optimized.
+
+Electronic Queue Management: Implementing a system that manages patient flow electronically can help prioritize and track patient arrivals, reducing physical congestion in the waiting area. This approach has proven effective in similar environments.",Expected Valid Answer
+Reduce Processing time Related Goals,Reduce length of stay (LOS),Eliminate unnecessary patient flow paths,4,,Waiting time reduced significantly,"Patients are spending too much time in our clinic from when they arrive to when they leave. The clinic currently has a workflow where patients move through multiple steps: check-in, waiting area, pre-treatment assessment, treatment, and post-treatment discharge. How can we reduce their length of stay?","Based on your goal to reduce the length of stay for patients in your clinic, I found two relevant approaches from research:
+
+Recommended Parameter: Change resource assignment
+
+What to modify: Adjust the assignment of staff across the various steps in the workflow. For example, ensuring that staff are allocated effectively during peak times at the check-in and pre-treatment assessment steps can expedite the overall process.
+Expected outcome: By reallocating resources to match patient flow, similar studies have shown that average length of stay can be significantly reduced, as bottlenecks in these early stages are alleviated and patients progress through the workflow more swiftly.
+Recommended Parameter: Reduce processing times for each activity
+
+What to modify: Identify time-consuming steps in the workflow (like treatment or pre-treatment assessments) and implement measures to minimize these durations, perhaps by standardizing procedures or using technology to facilitate faster assessments.
+Expected outcome: Research indicates that intensive process analysis and subsequent time reductions in various activities can lead to shorter overall lengths of stay, thereby increasing patient throughput and satisfaction.",Expected Valid Answer ,"To reduce the time patients are spending in your clinic, I found two relevant approaches from research that can help you streamline your workflow:
+
+Recommended Parameter: Change resource assignments
+
+What to modify: Consider adjusting the number of staff at various points in the process - for example, having dedicated nurses for the pre-treatment assessment and treatment phases can help expedite patient flow.
+Expected outcome: By optimizing staff roles and ensuring that the right resources are in place at each step, similar clinics have seen improvements in patient processing times and waiting periods.
+Recommended Parameter: Reduce processing time for any activity
+
+What to modify: Analyze each step in your workflow, particularly check-in and post-treatment discharge processes. Implementing faster data entry technologies or streamlining discharge protocols can reduce the time patients spend at these stages.
+Expected outcome: Research indicates that targeted reductions in processing times at critical steps can lead to significant decreases in overall patient length of stay.",Expected Valid Answer
+Increasing Processing Capacity Related Goals,Increased capacity and reduced patient backlog,Add more available hours,4,,,We have a backlog of patients waiting to be seen and we're at maximum capacity within working hours. The clinic currently operates 8:00 AM to 5:00 PM on weekdays only. Patient demand is consistently high and there's a waiting list. How can we handle more patients?,"Based on your goal to handle more patients in your clinic, I found two relevant approaches from research:
+
+Recommended Parameter: Increase working hours
+
+What to modify: Consider extending your clinic's operating hours to accommodate more patients. This could involve opening earlier, closing later, or even adding weekend hours.
+Expected outcome: Studies show that increasing service hours can lead to a significant rise in patient throughput, allowing your clinic to reduce backlog and better serve high-demand periods.
+Recommended Parameter: Increase the number of resources
+
+What to modify: Evaluate the possibility of adding more dental staff, including additional hygienists or providers, during busy periods. Increasing staff can help distribute the patient load more effectively.
+Expected outcome: Research indicates that adding resources during peak times can markedly reduce wait times and backlogs, enabling more patients to be seen within the same working hours.
+
+Questions to refine recommendation:
+
+What is the current patient load per hour, and how does it vary throughout the day?
+Is there flexibility in your staffing to allow for increased hours or additional staff?",Expected Valid Answer,"To manage the backlog of patients and increase your capacity, here are two actionable recommendations:
+
+Recommended Parameter: Increase available hours
+
+What to modify: Extend your operational hours beyond the current 8 AM to 5 PM schedule. Consider opening earlier or later during the week, or even adding weekend hours, to accommodate more patients.
+Expected outcome: By increasing the hours of operation, you can reduce the waiting list and manage patient flow more effectively, as other clinics have seen up to a 69% increase in patient throughput with similar changes.
+Recommended Parameter: Increase the number of resources
+
+What to modify: This could involve hiring additional staff or increasing the number of treatment rooms available. More resources will allow more patients to be seen simultaneously, thus reducing wait times.
+Expected outcome: Research has shown that adding personnel or capacity can directly improve patient access and reduce congestion, which significantly enhances overall clinic efficiency.
+
+Questions to refine recommendations:
+
+Are there existing staff that can take on extra shifts, or would you need to hire new personnel?
+Have you investigated if patient flow could be improved by adjusting appointment types or scheduling tactics?",Expected Valid Answer
+,,,,,,,,,,
+Reduce Processing time Related Goals,Reduce processing time for truck scanning,Reduce processing time of any activity,15,"Rezeq et al. (2024) developed a hybrid simulation-optimization approach for relief-aid distribution planning by addressing congestion at security checkpoints in humanitarian supply networks. Using the Kerem Abu Salem checkpoint between Israel and Gaza as a real-world case study, the researchers applied business process reengineering (BPR) to redesign the current security checkpoint process. The results demonstrated that Scenario 6 (combining all redesign improvements including electronic queue management, IT-based document processing, portable scanning equipment, extended working hours, and increased staffing) achieved a 90% reduction in security checkpoint cycle time and 28% reduction in distribution costs compared to the AS-IS model. This case study illustrates how simulation parameters (staffing levels, process times, resource allocation) derived from process reengineering can be systematically translated into quantifiable performance metrics and incorporated into optimization models to achieve specific management objectives in complex, congestion-prone environments.",,"Our security checkpoint is a major bottleneck. Trucks are waiting too long to be scanned and processed. The checkpoint currently uses manual document processing and standard scanning equipment. Each truck takes an average of 45 minutes to scan and clear, and the queue is constantly backed up. How can we speed up the scanning process?","Based on your goal to reduce waiting time at your security checkpoint, I found two relevant approaches from research:
+
+Recommended Parameter: Implement Electronic Queue Management System
+
+What to modify: Introduce an electronic queue management system to streamline the waiting process and manage truck flows effectively. This can reduce the manual burden on staff and speed up processing times.
+Expected outcome: Research indicates that incorporating this system can lead to significant reductions in average waiting times, facilitating better resource allocation at checkpoints (Rezeq et al., 2024).
+
+Recommended Parameter: Increase Staffing Levels or Extend Working Hours
+
+What to modify: Consider increasing the number of staff at the checkpoint or extending their working hours during peak times to better accommodate the volume of trucks.
+Expected outcome: Studies have shown that increasing staffing can improve processing capacity and significantly reduce congestion, resulting in decreased waiting times (Rezeq et al., 2024).
+Questions to refine recommendation:
+
+What is the current staffing level at your checkpoint, and are there any budget constraints for increasing staff?
+Have you considered any technology upgrades to assist with the document processing, or is the focus solely on staffing changes?",Expected Valid Answer,"To alleviate the bottleneck at your security checkpoint and speed up the scanning process, here are two recommendations based on proven strategies:
+
+Recommended Parameter: Implement electronic queue management and IT-based document processing
+
+What to modify: Transition from manual document processing to an electronic system. This could streamline documentation checks and integrate with scanning equipment to reduce processing times significantly.
+Expected outcome: Similar systems have achieved up to a 90% reduction in processing times at checkpoints by reducing the manual workload and speeding up document verification, leading to smoother flows and reduced wait times.
+Recommended Parameter: Increase the number of resources
+
+What to modify: Adding more scanning equipment or personnel to operate each scanner can help process trucks more quickly. Consider deploying mobile scanning teams as well, where additional resources can assist at peak times.
+Expected outcome: Research shows that increasing resource availability leads to improved patient or cargo flow, effectively reducing individual processing times and overall backlog.
+
+Questions to refine recommendations:
+
+What specific challenges do your staff face with the current manual processes?
+How flexible is your budget for investing in new technology or additional personnel?
+",Expected Valid Answer
+Reducing Cost Related Goals,Minimize cost,Reduce any of the activity costs,15,,,Our security checkpoint operations are costing us too much money. We need to reduce expenses without compromising the quality or thoroughness of the inspections. Where should we focus?,"Based on your goal to minimize operational costs at your security checkpoint, I found two relevant approaches from research:
+
+Recommended Parameter: Reduce Number of Staff
+
+What to modify: Analyze current staffing levels to identify if there are opportunities to streamline without reducing inspection quality—this may involve reassigning roles or optimizing shifts.
+Expected outcome: Research suggests that reducing redundancies in staffing can lead to a decrease in operational expenses while still maintaining effective processing outcomes (Maass et al., 2021).
+Recommended Parameter: Improve Process Efficiency with Automation
+
+What to modify: Invest in automation tools for document processing and scanning to decrease manual workload, which can help reduce dependency on human labor and enhance throughput.
+Expected outcome: Automation studies illustrate how implementing technology can help cut operational costs by increasing processing speed and reducing labor hours (Rezeq et al., 2024).
+
+Questions to refine recommendation:
+
+What specific areas of the checkpoint operations incur the highest costs currently?
+Are there existing technologies or processes in place that you think could be improved or automated?",Expected Valid Answer,"To reduce costs at your security checkpoint while maintaining quality and thoroughness, consider these two recommendations:
+
+Recommended Parameter: Optimize resource utilization
+
+What to modify: Analyze your current staffing and equipment utilization rates to identify underused resources. Streamlining worker roles and cross-training staff can help maximize efficiency and reduce overtime costs.
+Expected outcome: By ensuring all resources are used effectively, you can reduce operational costs without sacrificing inspection quality. Similar models have shown a substantial decrease in expenses through better resource management.
+Recommended Parameter: Reduce time-consuming manual processes
+
+What to modify: Invest in process automation where applicable, such as using automated scanning technologies that require less manual handling and can expedite inspections while maintaining thoroughness.
+Expected outcome: Research indicates that reducing manual processes not only cuts costs but can also lead to quicker inspections, potentially lowering overall operating expenses by up to 28% while improving throughput.
+
+Questions to refine recommendations:
+
+Can you provide details about which specific expenses you find most challenging?
+Are there budget constraints that limit your ability to invest in new technologies or approaches?",Expected Valid Answer
+,,,,,,,,,,
+Reducing Cost Related Goals,Reduce costs,Reduce any of the activity costs,1,"Boareto et al. (2022) conducted a case study on a stroke treatment pathway in a Brazilian hospital to demonstrate how simulation parameters can be systematically connected to management goals. The researchers identified four key performance goals: bed occupancy rate (maintain 75-95%), average patient stay length, door-to-needle time, and percentage of patients treated within 60 minutes. They then configured simulation parameters such as number of available beds (30, 25, or 20), mean assessment duration (ranging from 7,200 to 14,062 minutes), activity processing times, and resource allocation. By simulating different combinations of these parameters, they generated outcome data for each scenario, which was then evaluated using multicriteria decision-making to rank which parameter changes would best achieve the management goals. The study found that reducing assessment time was the optimal parameter adjustment. ",,"Our stroke treatment pathway is expensive and our costs are eating into the hospital budget. The hospital operates a 30-bed stroke unit with costs associated with assessment procedures, staff time, equipment, and resource allocation. The average assessment currently takes a long time and increases overall length of stay. Where can we cut costs without hurting patient outcomes?","Based on your goal to minimize operational costs in your stroke treatment pathway, I found two relevant approaches from research:
+
+Recommended Parameter: Change Resource Assignment
+
+What to modify: Optimize the assignment of staff and resources within the stroke unit to ensure that the most qualified personnel are utilized effectively on each patient. This may involve reassigning roles based on staff capabilities and patient needs.
+Expected outcome: Research indicates that efficient resource allocation can reduce unnecessary costs while maintaining high-quality patient care (Maass et al., 2021).
+Recommended Parameter: Reduce Assessment Processing Time
+
+What to modify: Focus on streamlining assessment procedures through process reengineering or the introduction of faster assessment techniques, which could involve modifying protocols or adopting new technologies.
+Expected outcome: Improved processing times have been shown to correlate with reduced overall length of stay and lower costs, helping to maintain quality of care (Rezeq et al., 2024).
+
+Questions to refine recommendation:
+
+What current procedures take the most time in the assessment process, and are there specific bottlenecks you've identified?
+Are there technologies or tools that you are currently using in the assessment process, and are there any plans or limitations for upgrading them?",Not a valid answer / Check again,"To cut costs in your stroke treatment pathway while maintaining patient outcomes, here are two strategic recommendations:
+
+Recommended Parameter: Reduce processing time for assessment procedures
+
+What to modify: Streamline the assessment process by using more efficient protocols, such as standardized assessment tools or integrated technologies that reduce time spent on each patient. Consider creating rapid assessment teams that can quickly evaluate patients without compromising thoroughness.
+Expected outcome: By optimizing the assessment methods, you can reduce the average assessment time, which in turn decreases the overall length of stay, potentially lowering operational costs significantly.
+Recommended Parameter: Increase resource utilization
+
+What to modify: Evaluate staffing patterns and resource allocation to ensure that personnel and equipment are being used to their full potential. Cross-training staff can also help to ensure that resources are flexible and available as needed.
+Expected outcome: Improved resource utilization can lead to significant cost savings. Research shows that enhancing personnel efficiency in a hospital setting can reduce operational costs without negatively impacting patient care.
+
+Questions to refine recommendations:
+
+Which specific assessment procedures are taking the longest, and what challenges do staff face during these processes?
+Are there existing protocols or technologies that you feel could be adapted or utilized better?
+",Not a valid answer / Check again
+Improving Resource Utilisation Related Goals,Optimize bed utilization ,Can be mapped to resource,1,,Workload for all Roles increased,"Our hospital has 30 beds in the stroke unit, but we're not using them efficiently. Occupancy is only at 65%. The hospital wants to make better use of available bed capacity. How can we optimize our bed utilization?
+","Based on your goal to optimize bed utilization in your stroke unit, I found two relevant approaches from research:
+
+Recommended Parameter: Increase Staffing Levels
+
+What to modify: Consider increasing staffing during peak times or reallocating current staff to ensure timely assessments and discharges, allowing beds to be freed up more quickly.
+Expected outcome: Research indicates that enhancing staffing levels can significantly improve patient flow through the unit, ultimately increasing bed occupancy and utilization rates (Maass et al., 2021).
+Recommended Parameter: Implement Electronic Queue Management System
+
+What to modify: Introduce an electronic system to better manage patient admissions and discharges, ensuring that beds are allocated efficiently and that patient flow is monitored in real time.
+Expected outcome: Such systems have been shown to facilitate improved bed utilization, leading to higher occupancy rates and enhanced operational efficiency (Rezeq et al., 2024).
+
+Questions to refine recommendation:
+
+What does your current admission and discharge process look like, and have you identified any delays in these areas?
+Are there specific periods during the week when bed utilization tends to be lower, and what factors contribute to this?",First Answer is Valid,"To improve bed utilization in your stroke unit and maximize the use of your available capacity, consider these two recommendations:
+
+Recommended Parameter: Increase patient throughput
+
+What to modify: Implement strategies such as streamlined admission and discharge processes. Focus on reducing the time from admission to assessment and from treatment to discharge by enhancing coordination between departments and using discharge planning early in the treatment process.
+Expected outcome: By optimizing the flow of patients through the system, you can increase occupancy rates. Research indicates that effective throughput management can raise bed utilization significantly, ensuring that beds are available for more patients during the day.
+Recommended Parameter: Improve resource allocation
+
+What to modify: Analyze patient length of stay data to identify trends and adjust staffing or bed availability accordingly. You might consider a flexible staffing model that allows you to allocate more staff during peak admission times.
+Expected outcome: Adjusting resources based on patient needs can enhance the efficiency of care delivery and increase bed occupancy, as effective resource allocation has been associated with improved hospital performance.
+
+Questions to refine recommendations:
+
+What challenges are currently affecting patient flow within the stroke unit?
+Do you have insight into the reasons for the current length of stay for patients, and how might that impact bed availability?",Expected Valid Answer
+Reduce Processing time Related Goals,Minimize patient length of stay,Reduce processing time of any activity,1,,,Stroke patients are spending too long in our hospital. Patients spend an average of several days in the unit before being discharged or transferred. We need to reduce their average length of stay. Which part of the treatment pathway can we speed up?,"Based on your goal to reduce the average length of stay for stroke patients in your hospital, I found two relevant approaches from research:
+
+Recommended Parameter: Reduce Assessment Processing Time
+
+What to modify: Streamline the assessment procedures by identifying any non-essential steps that can be eliminated or expedited. This might involve revising protocols or implementing more efficient assessment tools and technologies.
+Expected outcome: Research shows that reducing processing times directly correlates with decreased length of stay, resulting in improved operational efficiency (Rezeq et al., 2024).
+Recommended Parameter: Change Resource Assignment
+
+What to modify: Optimize staff allocation to ensure that the most qualified personnel are addressing patient needs promptly, thereby reducing delays in treatment and discharge planning.
+Expected outcome: Efficient resource allocation can minimize waiting times for necessary assessments and interventions, leading to a reduction in overall length of stay (Maass et al., 2021).
+
+Questions to refine recommendation:
+
+What specific steps in the treatment pathway are currently taking the longest, and are there any identified bottlenecks?
+Are there standardized protocols in place for discharge planning, and how are they currently managed?",Expected Valid Answer,"To reduce the average length of stay for stroke patients, consider focusing on these two key areas within the treatment pathway:
+
+Recommended Parameter: Streamline assessment and treatment processes
+
+What to modify: Optimize the assessment protocols by implementing rapid assessment tools that facilitate quicker evaluations by medical staff. Ensure that necessary imaging and lab tests are prioritized and scheduled promptly to avoid delays.
+Expected outcome: Research shows that expediting initial assessments can significantly decrease the overall length of stay, as faster identification of treatment needs allows for more timely interventions.
+Recommended Parameter: Enhance discharge planning processes
+
+What to modify: Initiate discharge planning at the time of admission by involving a multidisciplinary team. This team can coordinate care transitions and communicate follow-up needs to ensure a smoother discharge process.
+Expected outcome: Effective discharge planning has been proven to reduce delays in patient release, decreasing hospital stays while maintaining quality of care. Early planning can often lead to a smoother transition and fewer readmissions.
+
+Questions to refine recommendations:
+
+Which specific assessment phases are most time-consuming, and what factors contribute to those delays?
+Are there existing policies or protocols for discharge planning, and how effectively are they currently implemented?",Expected Valid Answer - Better than 1
+Increasing Processing Capacity Related Goals,Increase percentage of patients treated within 60 minutes,Change routing probabilities,1,,,The stroke unit currently follows a standard diagnostic pathway where all patients go through the same assessment sequence. Some patients who need immediate treatment are delayed because they follow the same routing as patients needing more evaluation. Our stroke patients are receiving treatment within 60 minutes. What can we do to prioritize faster treatment?,"Based on your goal to prioritize faster treatment for stroke patients by optimizing the assessment sequence, I found two relevant approaches from research:
+
+Recommended Parameter: Change Routing Probability/Distribution
+
+What to modify: Implement a triage system or modify the routing protocol to prioritize patients who require immediate treatment over those needing more extensive evaluation. This could involve creating a separate pathway for urgent cases.
+Expected outcome: Research indicates that adjusting routing strategies can significantly decrease waiting times for critical patients, enhancing the overall efficiency of treatment delivery (Zeinali et al., 2015).
+Recommended Parameter: Improve Resource Allocation and Staffing Levels
+
+What to modify: Ensure that additional staff or resources are available specifically for immediate treatment cases, allowing them to bypass unnecessary assessments without compromising thoroughness.
+Expected outcome: Effective resource allocation coupled with expedited processes for urgent cases can lead to faster treatment times, improving patient outcomes and reducing delays (Maass et al., 2021).
+
+Questions to refine recommendation:
+
+What criteria are currently being used to determine which patients follow the standard assessment pathway?
+Are there any existing protocols for identifying urgent cases, and how quickly are those cases currently assessed?",Expected Valid Answer,"To prioritize faster treatment for stroke patients who need immediate care and differentiate them from those requiring more extensive evaluation, consider these two strategies:
+
+Recommended Parameter: Implement a triage system
+
+What to modify: Develop a triage protocol that categorizes patients based on their urgency upon arrival. This allows those requiring immediate treatment (e.g., high-risk stroke candidates) to bypass standard pathways for quicker assessment and intervention.
+Expected outcome: A triage system can significantly speed up treatment times for urgent cases, ensuring they receive timely interventions. Research has shown that effective triage reduces wait times and improves clinical outcomes, particularly in stroke care.
+
+Recommended Parameter: Introduce parallel processing
+
+What to modify: Instead of routing all patients through the same sequential pathway, consider parallel processing where patients who need immediate treatment can receive urgent diagnostic evaluations simultaneously with ongoing care for others.
+Expected outcome: By allowing simultaneous assessments for different patient groups, you can significantly reduce delays in treatment initiation. This approach has been effective in similar clinical settings, showing improved turnaround times and better patient flow.
+Questions to refine recommendations:
+
+What criteria currently determine the routing for assessments, and how flexible is your team in adapting to urgent needs?
+Are there specific bottlenecks in the current assessment process that could be addressed to facilitate faster response times?",Expected Valid Answer
