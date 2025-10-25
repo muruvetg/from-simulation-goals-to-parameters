@@ -9,14 +9,14 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, messages = [] } = await request.json();
+    const { message, messages = [], model = "gpt-3.5-turbo" } = await request.json();
 
     // Load static data
     const csvData = DataLoader.loadParametersToGoalsTable();
     const staticData = 'Parameters to Goals Table (CSV):\n' + csvData;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: model,
       messages: PromptConfig.buildConversationMessages([...messages, { role: 'user', content: message }], staticData),
       max_tokens: 500,
       temperature: 0.7,
