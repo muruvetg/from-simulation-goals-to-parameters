@@ -123,7 +123,7 @@ export default function PromptsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Prompts Management</h1>
-            <p className="text-muted-foreground">Manage your system prompts and select active prompt</p>
+            <p className="text-muted-foreground mt-2">Manage your system prompts and select active prompt</p>
           </div>
 
           <Button onClick={() => setIsCreating(true)} className="gap-2">
@@ -175,21 +175,19 @@ export default function PromptsPage() {
               {prompts.map((prompt) => (
                 <div key={prompt.id} className={`${!prompt.isActive ? 'opacity-60' : ''}`}>
                   {/* Table Row */}
-                  <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                  <div
+                    className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => setExpandedPrompt(expandedPrompt === prompt.id ? null : prompt.id)}
+                  >
                     <div className="flex items-center gap-4 flex-1">
                       {/* Expand Button */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => setExpandedPrompt(expandedPrompt === prompt.id ? null : prompt.id)}
-                      >
+                      <div className="h-6 w-6 flex items-center justify-center">
                         {expandedPrompt === prompt.id ? (
                           <ChevronDown className="h-4 w-4" />
                         ) : (
                           <ChevronRight className="h-4 w-4" />
                         )}
-                      </Button>
+                      </div>
 
                       {/* Title */}
                       <div className="flex-1 min-w-0">
@@ -223,7 +221,7 @@ export default function PromptsPage() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex items-center gap-2 ml-4" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="outline"
                         size="sm"
