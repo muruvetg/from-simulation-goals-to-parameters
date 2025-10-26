@@ -4,9 +4,10 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (including dev dependencies for build)
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -20,5 +21,8 @@ RUN npm run build
 # Expose port
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+# Start script that runs migrations and then starts the app
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]
