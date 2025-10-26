@@ -58,14 +58,6 @@ Open http://localhost:3000 in your browser
 
 The application will automatically start PostgreSQL database, build the Next.js application, run database migrations, and launch the web server.
 
-## System Architecture
-
-<div align="center">
-
-![Experimental Setup](./data/ExperimentalSetup.svg)
-
-</div>
-
 ## Usage
 
 ### Web Interface
@@ -129,6 +121,14 @@ The application provides:
 - `.env`: Environment variables (create from template)
 - `package.json`: Node.js dependencies and scripts
 - `tailwind.config.ts`: Tailwind CSS configuration
+
+## System Architecture
+
+<div align="center">
+
+![Experimental Setup](./data/ExperimentalSetup.svg)
+
+</div>
 
 ## License
 
