@@ -38,7 +38,7 @@ Set up the necessary environment variables by creating a .env file in the projec
 cp .env.example .env
 ```
 
-Edit .env file and add your OpenAI API key:
+Or simply create a `.env` file and add your OpenAI API key:
 
 ```bash
 OPENAI_API_KEY=your_openai_api_key_here
