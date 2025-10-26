@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bot, ArrowUp } from 'lucide-react';
+import { Bot, ArrowUp, Settings } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -57,8 +58,18 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 pb-8">
       <div className="w-full max-w-4xl mx-auto space-y-6">
+        {/* Navigation */}
+        <div className="flex justify-end">
+          <Link href="/prompts">
+            <Button variant="outline" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Manage Prompts
+            </Button>
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-foreground">
@@ -70,10 +81,10 @@ export default function Home() {
         </div>
 
         {/* Chat Container */}
-        <div className="flex flex-col h-[70vh] max-h-[600px] min-h-[500px]">
+        <div className="flex flex-col h-[70vh] max-h-[600px] min-h-[500px] mb-8">
           {/* Messages Area */}
           <Card className="flex-1 mb-4">
-            <CardContent className="p-6 h-full overflow-y-auto">
+            <CardContent className="p-6 h-full overflow-y-auto pb-16">
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center space-y-3">
@@ -127,7 +138,7 @@ export default function Home() {
           </Card>
 
           {/* Input Area */}
-          <Card>
+          <Card className="mb-16">
             <CardContent className="p-0">
               <div className="border rounded-md">
                 {/* Main Input Area */}
@@ -180,6 +191,8 @@ export default function Home() {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="mb-16 opacity-0"></Card>
         </div>
       </div>
     </div>
