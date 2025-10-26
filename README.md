@@ -10,6 +10,10 @@ Business Process Simulation (BPS) provides a powerful means for analyzing and op
 
 The Goal-to-Parameter Translator is a Next.js-based research tool designed to help users translate business process simulation goals into technical simulation parameters. The system provides an intuitive chat interface where stakeholders can describe their business objectives in natural language and receive parameter suggestions powered by OpenAI's language models.
 
+## System Architecture
+
+![Experimental Setup](./data/ExperimentalSetup.svg)
+
 ## Features
 
 - Translates business goals into simulation parameters using multiple OpenAI models (GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo)
