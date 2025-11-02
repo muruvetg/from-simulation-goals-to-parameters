@@ -23,3 +23,25 @@ model Prompt {
 
   @@map("prompts")
 }
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages  Message[]
+
+  @@map("chat_sessions")
+}
+
+model Message {
+  id            String      @id @default(cuid())
+  role          String      // 'user' or 'assistant'
+  content       String      @db.Text
+  model         String?     // OpenAI model used
+  createdAt     DateTime    @default(now())
+  chatSessionId String
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
