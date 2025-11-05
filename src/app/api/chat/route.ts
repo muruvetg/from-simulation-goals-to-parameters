@@ -10,7 +10,19 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { message, messages = [], model = "gpt-3.5-turbo", sessionId } = await request.json();
+    const { message, messages = [], model = "gpt-4o-mini", sessionId } = await request.json();
+
+    // Load active prompt from database
+    const activePrompt = await prisma.prompt.findFirst({
+      where: { isActive: true }
+    });
+
+    if (!activePrompt) {
+      return NextResponse.json(
+        { error: 'No active prompt found. Please activate a prompt.' },
+        { status: 400 }
+      );
+    }
 
     // Load static data
     const csvData = DataLoader.loadParametersToGoalsTable();
@@ -18,9 +30,17 @@ export async function POST(request: NextRequest) {
     const staticData = 'Parameters to Goals Table (CSV):\n' + csvData +
                       '\n\nSimulation Parameters Table (CSV):\n' + simulationParamsData;
 
+    const conversationMessages = PromptConfig.buildConversationMessages([...messages, { role: 'user', content: message }], staticData, activePrompt.content);
+
+    // Log the messages being sent to OpenAI for debugging
+    console.log('=== OpenAI Messages ===');
+    console.log('System Prompt:', conversationMessages[0].content);
+    console.log('Total messages count:', conversationMessages.length);
+    console.log('========================');
+
     const completion = await openai.chat.completions.create({
       model: model,
-      messages: PromptConfig.buildConversationMessages([...messages, { role: 'user', content: message }], staticData),
+      messages: conversationMessages,
       max_tokens: 500,
       temperature: 0.7,
     });
