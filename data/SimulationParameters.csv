@@ -1,0 +1,41 @@
+Category,Parameter,Explanation,Examples,Goal - Parameter Relation Example,Notes
+1. Process model-related parameters,,,,,
+,Cycle time,"Cycle time is the total time it takes for a unit of work to be completed, from the beginning to the end of a process. Includes all stages of processing and delays","Cycle time: the total time it takes for one case (e.g., a customer order, a patient treatment) to go through the entire process from start to finish.",“Reduce cycle time” → shorten activity durations or change their distributions.,
+,Processing time,time spent actively working on a task or activity.,"Healthcare: Lab test takes 30 minutes.
+Logistics: Shipment check takes 10 minutes.",,
+,Waiting time,is the duration a unit of work spends waiting before being processed,,,
+,Enablement time,is the moment the activity is allowed to start according to the state of the execution,,,
+,Distribution of activity duration,Real processes are not fixed — times follow distributions.,"(e.g., exponential, normal, etc.) 
+Customer service call lasts between 3–10 min with exponential distribution.","""Reduce customer waiting time variability""",
+,Inter-arrival time,frequency/timing of new case arrivals,"Hospital: Patients arrive on average every 7 minutes (Poisson).
+E-commerce: Orders arrive every 2 minutes during peak hours.",“Test performance under peak load” → change inter-arrival times.,
+,Events configuration ,"how unexpected things happen in the process
+occurrence of start/catching events","Patients frequently leave the ER without being treated if waiting > 90 minutes.
+Machines are subject to random breakdowns, causing rework.
+Orders may be cancelled if not processed within 24h.",It's not a parameter,
+,Gateway routing probabilities / branching probability,Likelihood of branching at XOR/OR decision points,"Insurance: 70% claims go straight to approval, 30% require manual review.
+Healthcare: 50% patients discharged, 30% need radiology, 20% go to surgery.",“Change routing logic to balance load across departments.”,
+,,,,,
+2. Resource-related parameters,,,,,
+,Resources ,"The actual individual workers, machines, or units","10 nurses, 5 doctors, 3 MRI machines.",,
+,Resouce Pool,Responsible for performing each activity in the process model,,,
+,Roles ,Grouping of resources with similar skills/capabilities,"Hospital: Nurse role vs. Doctor role
+Call center: Agent role vs. “Supervisor role",“Ensure flexible allocation of staff” → adjust role definitions.,
+,Timetables for roles,"Default working times for a role, availability schedules","Nurses available 24/7 in shifts, but radiology only Mon–Fri 9–17h.","“Match resources to demand” → extend shifts, add night coverage.",
+,Resource costs ,How much a resource costs to employ,"Doctor = €100/h, Nurse = €50/h.",“Reduce cost per patient” → substitute expensive roles where possible.,
+,,,,,
+,,,,,
+,,,,,
+3. Scenario-related parameters,,,,,
+,Number of to-be simulated instances ,how many cases/runs the simulation should execute,"patients, orders, calls, etc. - 
+Healthcare: Simulate 1,000 patients arriving at an ER to test how bottlenecks form.
+Manufacturing: Simulate 500 production orders in a month to compare throughput.",“Check scalability of process under increased demand” → Increase number of simulated instances.,
+,,,,,
+,,,,,
+,,,,,
+Output of Scenarios,,,,,
+,,,,,
+Flow Time,"Cycle time, Waiting + Processing + Inter waiting times + Off timetable",,,,
+Effective time,The actual working or processing time spent on value-adding activities (without waiting or idle periods).,,,,
+Waiting time ,The time an entity spends waiting for resources or the next activity before processing continues.,,,,
+Off timetable,The deviation from the scheduled time (how much earlier or later than planned an activity or appointment occurred).,,,,

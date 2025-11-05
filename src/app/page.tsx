@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bot, ArrowUp, Settings } from 'lucide-react';
+import { Bot, ArrowUp, Settings, PanelLeft } from 'lucide-react';
+import { ChatSidebar } from '@/components/ChatSidebar';
+import { cn } from '@/lib/utils';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -26,8 +28,33 @@ export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('gpt-3.5-turbo');
+  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [refreshSessionsFn, setRefreshSessionsFn] = useState<(() => Promise<void>) | null>(null);
 
+
+  const loadSession = async (sessionId: string) => {
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}`);
+      const session = await response.json();
+
+      if (session.messages) {
+        setMessages(session.messages.map((msg: any) => ({
+          role: msg.role,
+          content: msg.content
+        })));
+      }
+      setCurrentSessionId(sessionId);
+    } catch (error) {
+      console.error('Error loading session:', error);
+    }
+  };
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setCurrentSessionId(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,16 +62,50 @@ export default function Home() {
 
     const userMessage: Message = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
     try {
+      // Create new session if none exists (first message)
+      let sessionId = currentSessionId;
+      if (!sessionId) {
+        // Generate smart title from first message (limit to 50 chars)
+        let sessionTitle = currentInput.slice(0, 50);
+        if (currentInput.length > 50) {
+          sessionTitle += '...';
+        }
+
+        const sessionResponse = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: sessionTitle }),
+        });
+
+        if (sessionResponse.ok) {
+          const newSession = await sessionResponse.json();
+          sessionId = newSession.id;
+          setCurrentSessionId(sessionId);
+          // Refresh sidebar sessions
+          if (refreshSessionsFn) {
+            await refreshSessionsFn();
+          }
+        } else {
+          console.error('Failed to create session');
+        }
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: input, messages, model: selectedModel }),
+        body: JSON.stringify({
+          message: currentInput,
+          messages,
+          model: selectedModel,
+          sessionId
+        }),
       });
 
       const data = await response.json();
@@ -58,17 +119,40 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 pb-8">
-      <div className="w-full max-w-4xl mx-auto space-y-6">
-        {/* Navigation */}
-        <div className="flex justify-end">
-          <Link href="/prompts">
-            <Button variant="outline" className="gap-2">
-              <Settings className="h-4 w-4" />
-              Manage Prompts
-            </Button>
-          </Link>
-        </div>
+    <>
+      <ChatSidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        currentSessionId={currentSessionId}
+        onSessionSelect={loadSession}
+        onNewChat={handleNewChat}
+        onRefreshSessions={setRefreshSessionsFn}
+      />
+
+      <div className={cn(
+        "min-h-screen bg-background transition-all duration-300",
+        sidebarOpen ? "lg:ml-72" : "ml-0"
+      )}>
+        <div className="flex items-center justify-center p-4 pb-8 min-h-screen">
+          <div className="w-full max-w-4xl mx-auto space-y-6">
+            {/* Navigation */}
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="gap-2"
+              >
+                <PanelLeft className="h-4 w-4" />
+                {sidebarOpen ? 'Hide' : 'Show'} History
+              </Button>
+
+              <Link href="/prompts">
+                <Button variant="outline" className="gap-2">
+                  <Settings className="h-4 w-4" />
+                  Manage Prompts
+                </Button>
+              </Link>
+            </div>
 
         {/* Header */}
         <div className="text-center space-y-2">
@@ -196,5 +280,7 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </div>
+    </>
   );
 }

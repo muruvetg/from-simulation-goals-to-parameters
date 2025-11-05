@@ -24,6 +24,17 @@ export class DataLoader {
     }
   }
 
+  static loadSimulationParametersTable(): string {
+    try {
+      const filePath = path.join(process.cwd(), 'data', 'SimulationParameters.csv');
+      const fileContent = fs.readFileSync(filePath, 'utf-8');
+      return fileContent;
+    } catch (error) {
+      console.error('Error loading SimulationParameters.csv:', error);
+      return '';
+    }
+  }
+
   static loadCSVFile(filename: string): string {
     try {
       const filePath = path.join(process.cwd(), 'data', filename);

@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // PUT /api/prompts/[id] - Update prompt
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // If activating this prompt, deactivate all others first
@@ -37,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/prompts/[id] - Delete prompt
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     await prisma.prompt.delete({
       where: { id },
@@ -56,7 +56,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 // GET /api/prompts/[id] - Get single prompt
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const prompt = await prisma.prompt.findUnique({
       where: { id },
