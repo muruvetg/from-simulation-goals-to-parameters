@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bot, ArrowUp, Settings, PanelLeft } from 'lucide-react';
+import { Bot, ArrowUp, Settings, PanelLeft, FlaskConical } from 'lucide-react';
 import { ChatSidebar } from '@/components/ChatSidebar';
 import { cn } from '@/lib/utils';
 
@@ -146,12 +146,20 @@ export default function Home() {
                 {sidebarOpen ? 'Hide' : 'Show'} History
               </Button>
 
-              <Link href="/prompts">
-                <Button variant="outline" className="gap-2">
-                  <Settings className="h-4 w-4" />
-                  Manage Prompts
-                </Button>
-              </Link>
+              <div className="flex gap-2">
+                <Link href="/bulk-test">
+                  <Button variant="outline" className="gap-2">
+                    <FlaskConical className="h-4 w-4" />
+                    Bulk Testing
+                  </Button>
+                </Link>
+                <Link href="/prompts">
+                  <Button variant="outline" className="gap-2">
+                    <Settings className="h-4 w-4" />
+                    Manage Prompts
+                  </Button>
+                </Link>
+              </div>
             </div>
 
         {/* Header */}
@@ -255,6 +263,7 @@ export default function Home() {
                             ))}
                           </SelectContent>
                         </Select>
+
                       </div>
 
                       <Button

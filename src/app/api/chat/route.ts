@@ -26,9 +26,10 @@ export async function POST(request: NextRequest) {
 
     // Load static data
     const csvData = DataLoader.loadParametersToGoalsTable();
-    const simulationParamsData = DataLoader.loadSimulationParametersTable();
-    const staticData = 'Parameters to Goals Table (CSV):\n' + csvData +
-                      '\n\nSimulation Parameters Table (CSV):\n' + simulationParamsData;
+    // TODO: Re-enable SimulationParameters.csv when needed
+    // const simulationParamsData = DataLoader.loadSimulationParametersTable();
+    const staticData = 'Parameters to Goals Table (CSV):\n' + csvData;
+    // + '\n\nSimulation Parameters Table (CSV):\n' + simulationParamsData;
 
     const conversationMessages = PromptConfig.buildConversationMessages([...messages, { role: 'user', content: message }], staticData, activePrompt.content);
 

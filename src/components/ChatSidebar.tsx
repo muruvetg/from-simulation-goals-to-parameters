@@ -10,7 +10,8 @@ import {
   MessageSquare,
   Trash2,
   Check,
-  X
+  X,
+  History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -142,6 +143,22 @@ export function ChatSidebar({
     setEditTitle('');
   };
 
+  const clearAllHistory = async () => {
+    if (!confirm('Are you sure you want to delete all chat history? This action cannot be undone.')) return;
+
+    try {
+      const deletePromises = sessions.map(session =>
+        fetch(`/api/sessions/${session.id}`, { method: 'DELETE' })
+      );
+
+      await Promise.all(deletePromises);
+      fetchSessions();
+      onNewChat();
+    } catch (error) {
+      console.error('Error clearing all history:', error);
+    }
+  };
+
   return (
     <>
       {/* Sidebar */}
@@ -167,12 +184,24 @@ export function ChatSidebar({
 
             <Button
               onClick={createNewSession}
-              className="w-full gap-2"
+              className="w-full gap-2 mb-2"
               size="sm"
             >
               <Plus className="h-4 w-4" />
               New Chat
             </Button>
+
+            {sessions.length > 0 && (
+              <Button
+                onClick={clearAllHistory}
+                variant="outline"
+                className="w-full gap-2 text-destructive hover:text-destructive"
+                size="sm"
+              >
+                <History className="h-4 w-4" />
+                Clear All History
+              </Button>
+            )}
           </div>
 
           {/* Sessions List */}

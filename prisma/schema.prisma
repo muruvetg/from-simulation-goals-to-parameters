@@ -45,3 +45,38 @@ model Message {
 
   @@map("messages")
 }
+
+model TestBatch {
+  id          String   @id @default(cuid())
+  name        String
+  testMessage String   @db.Text
+  groundTruth String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  runs        TestRun[]
+
+  @@map("test_batches")
+}
+
+model TestRun {
+  id                String    @id @default(cuid())
+  sessionId         String?   // Link to chat session if created
+  model             String
+  prompt            String
+  promptId          String
+  iteration         Int
+  status            String    // 'pending', 'running', 'completed', 'error'
+  startTime         DateTime?
+  endTime           DateTime?
+  error             String?   @db.Text
+  response          String?   @db.Text
+  groundTruthMatch  String?   // 'good', 'bad', 'neutral'
+  notes             String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  testBatchId       String
+  testBatch         TestBatch @relation(fields: [testBatchId], references: [id], onDelete: Cascade)
+
+  @@map("test_runs")
+}
