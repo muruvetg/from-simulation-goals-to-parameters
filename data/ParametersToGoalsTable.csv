@@ -1,37 +1,389 @@
-Goal Groups,Goal,SimuBridge Parameter Change,Paper,Description of Paper,Notes,Test Questions,Prompt 1 Answers,Result Accepted / Not Accepted - 1,Prompt 2 Answers,Result Accepted / Not Accepted - 2
-,,,,,,,,,,
-Waiting Time Related Goals,Reduce waiting time,"Change resource assignment, Reduce resource",16,"Maass et al. (2021) developed a discrete event simulation model for a Mayo Clinic CT department serving emergency, inpatient, and outpatient patients competing for six unique CT machines. Using a real-world case study of ED CT access delays, the researchers tested three operational interventions: adding dedicated patient transporters (1-2 staff), implementing faster creatinine lab testing, and assigning a dedicated nurse to monitor patient readiness. Simulation parameters included arrival rates (varying by patient type, time of day, and day of week), resource capacity (CT machines, transporters, holding bays), processing times (scan duration, image processing, equipment cleaning), patient prioritization rules (trauma/stroke patients highest priority), and resource-activity assignments (matching patients to compatible machines). The results demonstrated that adding one dedicated transporter achieved a 10-minute reduction in ED CT access times and the organization successfully realized these predicted improvements in practice, achieving 80% compliance with their 30-minute access goal and meeting the 25-minute stroke imaging guideline. This case study illustrates how simulation parameters derived from process analysis can be systematically adjusted to achieve specific management objectives in complex healthcare environments with multiple competing patient demands.",,,,,,
-Reducing Cost Related Goals,Minimize operational costs,"Reduce number of staff (if there is any cost on) 
-Reduce working shifts",16,,"Reduce working times of Role 3, resulted cost increase. Why ? The in use hours for resource increased. Same process took longer time and cost increased",,,,,
-Reduce Processing time Related Goals,Reduce lab processing time for patients,Reduce processing time of any activity,16,,,,,,,
-,,,,,,,,,,
-Increasing Processing Capacity Related Goals,Increase processing capacity,Increase number of resources,15,"Rezeq et al. (2024) developed a hybrid simulation-optimization approach for relief-aid distribution planning by addressing congestion at security checkpoints in humanitarian supply networks. Using the Kerem Abu Salem checkpoint between Israel and Gaza as a real-world case study, the researchers applied business process reengineering (BPR) to redesign the current security checkpoint process. The results demonstrated that Scenario 6 (combining all redesign improvements including electronic queue management, IT-based document processing, portable scanning equipment, extended working hours, and increased staffing) achieved a 90% reduction in security checkpoint cycle time and 28% reduction in distribution costs compared to the AS-IS model. This case study illustrates how simulation parameters (staffing levels, process times, resource allocation) derived from process reengineering can be systematically translated into quantifiable performance metrics and incorporated into optimization models to achieve specific management objectives in complex, congestion-prone environments.",,,,,,
-Increasing Processing Capacity Related Goals,Handle greatest number of trucks,Increase working hours,15,,,,,,,
+Goal Groups,Goal,Parameter,Process Description
+,,,
+Waiting Time Related Goals,Reduce waiting time,Increase number of resources,"The paper describes a discrete event simulation (DES) modeling process for improving emergency department (ED) CT access times in a large academic medical center with six unique CT machines serving multiple patient types.
+Location: Saint Marys Hospital, Mayo Clinic, Rochester, Minnesota Department: Radiology - CT Scanning Resources:
+        •        6 CT machines (each with different capabilities - not all can do all exam types)
+        •        External transporters (shared across entire hospital)
+        •        Internal transporters (dedicated to radiology only)
+        •        Holding bays (waiting areas inside radiology)
+Patient Types: Emergency (ED), Outpatients (scheduled), Inpatients (semi-scheduled) Volume: 10,000+ patients over 10 months Hours: 24/7 for ED/inpatients, business hours for outpatients
+Current Performance:
+        •        ED patient average wait: 58.8 minutes from order to scan
+        •        Goal: Under 30 minutes for all ED patients
+        •        National guideline for stroke: Under 25 minutes
+        •        Currently achieving goal only 70% of time
+Process Flow
+Category 1: ED Trauma/Stroke Patients (Highest Priority)
+        1        Patient arrives at emergency department with urgent condition (car accident, stroke symptoms, severe trauma)
+        2        ED doctor examines patient and orders CT scan immediately
+        3        System checks which CT machines are available and compatible with exam type needed
+        4        Transport request sent to external transporter
+        5        Transporter travels to ED, picks up patient (average: 13.6 minutes)
+        6        Patient brought to CT room
+        7        CT scan performed
+        8        Patient returns to ED for treatment
+No lab tests required - emergency fast track
+Category 2: ED Non-Trauma Patients (Medium Priority)
+        1        Patient arrives at emergency department (severe abdominal pain, suspected internal issues - urgent but not immediately life-threatening)
+        2        ED doctor orders CT scan AND blood tests
+        3        Nurse draws blood samples
+        4        Blood sent to lab for testing (including creatinine test for kidney function)
+        5        WAIT for lab results - creatinine test is slowest in 17% of patients (10-30+ minutes)
+        6        Lab results complete and appear in computer system
+        7        15-minute delay - busy ED nurse checking multiple patients, eventually notices labs are done
+        8        Nurse reviews results, confirms safe for contrast dye, signals patient is cleared
+        9        Transport request sent to external transporter
+        10        Transporter travels to ED, picks up patient (average: 13.6 minutes)
+        11        Patient brought to CT room
+        12        CT scan performed (contrast dye administered)
+        13        Patient returns to ED
+Total average time: 61.8 minutes
+Category 3: Outpatients (Lower Priority - Scheduled)
+        1        Patient scheduled appointment days/weeks in advance for specific date and time
+        2        Patient arrives at radiology department and checks in
+        3        Staff takes patient to holding bay (preparation area inside radiology)
+        4        Nurse reviews patient's pre-existing lab results and medical history (done before appointment)
+        5        Nurse confirms safe for CT scan
+        6        Patient waits if ED patients arrive (ED has priority)
+        7        CT machine becomes available
+        8        Transport request sent to internal transporter
+        9        Internal transporter moves patient from holding bay to CT room (average: 7.1 minutes - shortest distance)
+        10        CT scan performed
+        11        Patient returns to holding bay or checks out
+        12        Patient goes home
+Category 4: Inpatients (Lower Priority - Semi-Scheduled)
+        1        Patient already hospitalized, doctor orders CT scan
+        2        Patient given time window (e.g., ""between 2-4 PM today"")
+        3        Nurse goes to patient's hospital room, performs safety assessment
+        4        Patient waits in their hospital room (could be anywhere in hospital)
+        5        When time window arrives and CT machine available, transport is requested
+        6        External transporter travels to patient's room location
+        7        Transporter picks up patient and brings to radiology (average: 27.5 minutes - longest distance because patient could be anywhere)
+        8        CT scan performed
+        9        Patient transported back to hospital room
+Machine Specialization
+NOT all CT machines can do all exams:
+        •        All 6 machines: Abdomen, chest, trauma, bones (common exams)
+        •        Only 5 machines (CT1-CT5): Brain scans, vascular imaging, biopsies
+        •        Only 2 machines (CT3, CT5): Cardiac (heart) scans, brain blood vessels ← BOTTLENECK
+        •        Only 2 machines (CT1, CT2): Long procedures (2-5 hours each)"
+Reducing Cost Related Goals,Minimize operational costs,Increase number of resources,
+Reduce Processing time Related Goals,Reduce lab processing time for patients,Reduce processing time of any activity,
+,,,
+Increasing Processing Capacity Related Goals,Increase processing capacity,Increase number of resources,"Setting: Kerem Abu Salem (KAS) security checkpoint between Israel and Gaza - humanitarian and commercial goods entry point for 2 million Gaza residents (2,000 trucks/week, 9 hours/day, 5 days/week)
+Resources:
+        •        4 main operational lanes (document validation, X-ray checking, cell area, Gaza staging area)
+        •        41 total employees (10 validation, 9 X-ray, 14 cell area, 10 Gaza staging, various roles)
+        •        11 outdoor cells (1 hectare each, 20 trucks capacity per cell)
+        •        X-ray machine, dogs, hand scanners, forklifts, shuttle trucks
+Operational Hours: 6 AM - 3 PM entry cutoff, 5 days/week (Sunday-Saturday), operations continue until sundown Volume: ~2,000 trucks per week (400 trucks/day average), arrival rate: 1 truck every 3 minutes Current Performance:
+        •        Average cycle time: 3.05 hours/truck
+        •        Average waiting time: 2.68 hours/truck
+        •        Total distribution cost: $2.54M per week
+Process Flow
+All trucks (humanitarian and commercial) follow this process:
+        1        Trucks arrive at checkpoint parking yard near entrance gates
+        2        Park the truck - Wait in line to check in (average: 15 minutes)
+        3        Driver walks to Israeli Authority Office to check truck number on board
+        4        Driver obtains ""Taom"" document (describes cargo type and size)
+        5        Check goods documents - Israeli security verifies Taom matches actual cargo (average: 5 minutes)
+        ◦        If mismatch found (10% probability) → Truck rejected, returns to origin
+        ◦        If match confirmed (90%) → Continue to next step
+        6        Pay customs fees - Driver pays ~$200/truck plus other fees at designated window (average: 8 minutes)
+        7        Scan the truck - Security officer randomly tests trucks using dogs and hand scanner (average: 10 minutes)
+        ◦        No security concerns (85%) → Continue to cell area
+        ◦        Security doubts (15%) → Diverted to X-ray machine
+        8        X-ray machine scanning (for 15% of trucks) - Full truck scan (average: 15 minutes)
+        ◦        Negative result (60% of scanned) → Continue to cell area
+        ◦        Positive result (40% of scanned) → Search for illegal items
+        9        Search for illegal items (if positive X-ray) - Forklift rearranges load (average: 30 minutes)
+        ◦        Illegal items found (20%) → Truck confiscated
+        ◦        No illegal items (80%) → Continue to cell area
+        10        Enter Cell Area - Truck assigned to one of 11 cells (average subprocess: 45 minutes total)
+        ◦        Categorize goods (food vs. non-food) by inspecting Taom (7 min)
+        ◦        Unload goods from truck to cell floor (15 min)
+        ◦        Security guard walks between pallets with small scan machine (8 min)
+        ◦        Forklifts upload goods onto shuttle trucks (15 min)
+        11        Transport to Gaza staging area - Shuttle trucks move goods (operate only between 6 AM - 3 PM, average: 10 minutes)
+        12        Unload at Gaza staging area - Goods deposited (opens 3 PM - 6 PM, average: 15 minutes)
+        13        Load on Palestinian trucks - Forklifts upload to Gaza-bound trucks (average: 15 minutes)
+        14        Trucks depart via Philadelphia Corridor to final destinations in Gaza
+Key Constraint: No direct contact between Israeli-side trucks and Gaza-side trucks (security separation)"
+Increasing Processing Capacity Related Goals,Handle greatest number of trucks,Increase working hours,
 Waiting Time Related Goals,Reduce average waiting time at security checkpoint,"Electronic queue management system added
-Queue management / activity duration",15,,Observed waiting time reduced ,,,,,
-Waiting Time Related Goals,Reduce time-consuming manual processes,Reduce activity processing time,15,,,,,,,
-,,,,,,,,,,
-Waiting Time Related Goals,Reduce patient waiting times,Decrease resource count. Tester number reduced from 6 to 4,14,"Zeinali et al. (2015) developed a simulation-based metamodeling approach for resource planning in emergency departments. The study created a discrete event simulation model of an Iranian hospital's emergency department, then built metamodels to approximate the relationship between simulation inputs (number of receptionists, nurses, residents, and beds) and outputs (total patient waiting time). By testing multiple resource configurations via simulation and using metamodels to efficiently explore the solution space, they identified that reducing nurses from 3 to 2 and adding one resident—while maintaining budget constraints—achieved a 48% reduction in average patient waiting times (from 44 to 23 minutes).",,,,,,
-Waiting Time Related Goals,Reduce patient waiting times,Change Routing probability / distribution,14,,,,,,,
-Increasing Processing Capacity Related Goals,Relieve congestion and improve patient flow,Increase number of resources,14,,,,,,,
-,,,,,,,,,,
-Reduce Processing time Related Goals,Reduce Processing Time,Increase resources,8,"Mahendra et al. (2024) evaluated and improved the Electronic Traffic Law Enforcement (ETLE) business process at an Indonesian Regional Police Traffic Directorate. They interviewed officers to assess capability levels, revealing a gap between current (Level 2) and target (Level 3) capability. In the improvement phase, they identified that insufficient computer resources and inflexible validation procedures were key bottlenecks limiting validation productivity. They developed seven improvement scenarios: Improvement I (resource adjustment: adding computers and extending work hours) achieved 200.42% productivity increase with 6.94% validation rate; Improvement II (resource adjustment plus allowing same-day validation) achieved 424.74% productivity increase with 12.1% validation rate. This study demonstrates how simulation parameters (staffing, computer availability, working hours, validation period rules) directly map to operational management objectives (validation productivity, processing rate)",,,,,,
-,,,,,,,,,,
-Increasing Processing Capacity Related Goals,Increase production capacity slightly and reduce waste time,Decrease processing time,7,"Czvetko et al. (2021) developed a data-driven business process management (BPM) methodology integrated with Industry 4.0 technologies to redesign a CNC production line at a Hungarian assembly company. Using a real-world case study to transform a conventional manufacturing plant into a fully automated ""smart"" factory unit, the researchers identified key simulation parameters including processing times (CNC milling duration, operator-dependent variations), resource capacity (number of CNC machines, programmers, operators, cutting machines), arrival rates and scheduling requirements, operator utilization rates, and walking/transportation times. Three process improvement scenarios were tested through BPMN-based simulation: eliminating CAM program writing by operators, enabling operators to manage multiple CNC machines simultaneously, and introducing automated guided vehicles (AGVs) for material transport. The results demonstrated that Scenario 2 achieved a 40% increase in production capacity by reassigning resources more efficiently, while prediction models reduced estimation errors. ",,,,,,
-Increasing Processing Capacity Related Goals,Increased the quantity produced per shift,"Change resource activity assignments, Role3 and 2 -> Role4",7,,"Cycle time decreased, waiting time decreased. Means more cases can be handled. ",,,,,
-,,,,,,,,,,
-Waiting Time Related Goals,Reduce time-consuming call handling,Decrease call arrival rate or event generation rate,6,"Pereira et al. (2021) made a case study to improve the incident management (IM) process at a multinational company's IT support service. The researchers systematically analyzed the current process to identify five performance issues affecting processing time. Using simulation modeling, they tested four different redesign scenarios by applying specific BPM heuristics (activity elimination, activity automation, and integral technology). The analysis revealed that the optimal configuration—eliminating phone-based incident entry, automating all first-level support activities through system upgrade, and centralizing email as the single entry point—achieved a 10.7% reduction in second-level support processing time and eliminated 100% of first-level support processing time. This case study demonstrates how simulation parameters (activity automation, routing rules, system capabilities) directly correlate with management objectives (time reduction, error elimination).","Refers to decreasing unnecessary event arrival
-Observed waiting time reduced ",,,,,
-Waiting Time Related Goals,Improve time performance,Reduce processing time,6,,,,,,,
-Waiting Time Related Goals,Reduce processing time,Reduce processing time for any activity,6,,,,,,,
-,,,,,,,,,,
-Increasing Processing Capacity Related Goals,Improve patient access & autonomy,Add more available hours,2,"Braaksma et al. (2017) developed a reusable simulation model to evaluate implementing a combined walk-in and appointment system for CT-scan facilities. The study used discrete event simulation to test multiple scenarios at the Academic Medical Center in Amsterdam, examining performance indicators like access time, waiting time, and resource utilization. They systematically varied simulation parameters including the number of available scanners, appointment scheduling strategies, patient arrival rates, and walk-in tolerance levels to identify which parameter configurations best achieved management goals such as reducing patient access time from 4.7 days to under one day. The research demonstrates that simulation parameters directly drive performance outcomes and provides a practical methodology for translating operational objectives into specific parameter settings",,,,,,
-Improving Resource Utilisation Related Goals,Optimize resource utilization & reduce waste,Can be related to inter arrival time,2,,Workload increased with optimised version. Because cases arrived more often,,,,,
-Improving Resource Utilisation Related Goals,Optimize resource allocation & capacity,CT scanner can mapped to resource,2,,"Reduced working schedule for Role 1, workload increased from %71 to 97%",,,,,
-,,,,,,,,,,
-Increasing Processing Capacity Related Goals,Increase throughput,Add more available hours,4,"Al-Hawari et al. (2022) developed a framework to optimize educational dentistry clinics in Jordan. The study tested multiple simulation scenarios combining different parameters: appointment scheduling rules, orthodontist work schedules, receptionist staffing, and patient flow paths. They used design of experiments and their effects on performance measures (patient waiting times, length of stay, resource utilization, and throughput). Results showed that the optimal configuration reduced orthodontic patient waiting times by 37.74% and length of stay by 29.44%, while increasing patient throughput by 69.39%. ",,,,,,
-Improving Resource Utilisation Related Goals,Improve resource utilization,Increase/Decrease role working capacity,4,,,,,,,
-Improving Resource Utilisation Related Goals,Increase receptionist utilization,Increase/Decrease resources,4,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
-,,,,,,,,,,
+Queue management / activity duration",
+Waiting Time Related Goals,Reduce time-consuming manual processes,Reduce activity processing time,
+,,,
+Waiting Time Related Goals,Reduce patient waiting times,Decrease resource count,"Modarres Hospital Emergency Department in Tehran, Iran operating Chest Pain Unit (CPU) for heart patients (52,000 patients/year, ~145 patients/day, 24/7 operations)
+Problem: Long patient waiting times and congestion. Ministry mandates: all patients must be discharged/admitted within 6 hours of arrival. Current total average waiting time: 44 minutes, 40% have heart problems. 
+Resources:
+        •        1 triage nurse (categorizes patients by urgency)
+        •        2 receptionists (collect patient information, locate files)
+        •        3 nurses (perform ECG tests, monitoring)
+        •        1 heart resident (medical decision-making, treatment)
+        •        7 monitoring beds (for patient treatment and observation)
+        •        CPR equipment (for most urgent cases)
+Process Flow
+All patients are categorized by Emergency Severity Index (ESI) from 1 (most urgent) to 5 (least urgent)
+ESI Level 1: Most Urgent - Life-Threatening (2% of patients)
+        1        Patient arrives by ambulance with urgent cardiac condition (cardiac arrest, severe heart attack)
+        2        Immediate CPR - Patient goes directly to Cardio Pulmonary Resuscitation room (no waiting)
+        3        All staff temporarily stop their tasks to provide immediate care (seconds matter)
+        4        CPR performed to resuscitate patient
+        5        If CPR successful → Patient transferred to CPU for further treatment
+        6        If unsuccessful → Patient outcome recorded
+No triage, no waiting - immediate life-saving intervention
+
+ESI Level 2: Urgent (20% of patients)
+        1        Patient arrives at ED entrance
+        2        Triage assessment - Triage nurse evaluates patient (average: 2-5 minutes)
+        3        Skip reception - ESI 2 patients go directly to CPU without waiting (high priority)
+        4        Wait for bed assignment - Patient waits until monitoring bed becomes available
+        5        Bed assigned - Patient placed on monitoring bed in CPU
+        6        ECG taken - Nurse performs electrocardiography test (average: 5-15 minutes)
+        7        Wait for heart resident - Patient waits for resident availability
+        8        Heart resident examination - Resident evaluates condition and decides treatment (average: 10-20 minutes)
+        9        Decision point:
+        ◦        Treatment sufficient → Discharge from ED
+        ◦        Need more treatment → Go to Step 10
+        ◦        Need admission → Transfer to inpatient care unit
+        10        Further treatment - Lab tests, medical advice, monitoring, another ECG (average: 45-180 minutes depending on tests)
+        11        Final resident decision - Re-evaluation after treatment
+        12        Patient discharged or admitted
+
+ESI Level 3 & 4: Moderate Urgency (35% of patients)
+        1        Patient arrives at ED entrance
+        2        Triage assessment - Triage nurse evaluates patient (average: 2-5 minutes)
+        3        Reception - Patient goes to receptionist who collects personal information and locates medical files (average: 3-5 minutes)
+        4        Wait for bed assignment - Patient waits until monitoring bed available in CPU
+        5        Bed assigned - Patient placed on monitoring bed
+        6        ECG taken - Nurse performs test (average: 5-15 minutes)
+        7        Wait for heart resident - Patient waits for resident availability
+        8        Heart resident examination - Evaluation and treatment decision (average: 10-20 minutes)
+        9        Decision point (same as ESI 2):
+        ◦        Treatment sufficient → Discharge
+        ◦        Need more treatment → Further treatment (lab tests, monitoring, etc.)
+        ◦        Need admission → Transfer to inpatient unit
+        10        If further treatment needed: Lab tests (45-180 min), medical advice (15-90 min), monitoring (30-60 min)
+        11        Final decision - Discharge or admit
+
+ESI Level 5: Least Urgent (43% of patients)
+        1        Patient arrives at ED entrance
+        2        Triage assessment - Triage nurse evaluates (average: 2-5 minutes)
+        3        Reception - Collect information (average: 3-5 minutes)
+        4        General physician visit - Patient sees general physician in ED (not heart specialist)
+        5        Discharged - Patient leaves ED
+Does NOT go to CPU - handled by general ED"
+Waiting Time Related Goals,Reduce patient waiting times,Change Routing probability / distribution,
+Increasing Processing Capacity Related Goals,Relieve congestion and improve patient flow,Increase number of resources,
+,,,
+Reduce Processing time Related Goals,Reduce Processing Time,Increase resources,"Regional Police Traffic Directorate (RPTD) in Indonesia operates Camera-based traffic violation capture, validation, and enforcement
+Staff: 7 validation officers, only 2 computers
+Problem: 95%+ of 3.4 million annual violations never get validated and processed
+Resources
+        •        Electronic Traffic Law Enforcement (ETLE)  cameras: 24/7 violation capture
+        •        2 computers for 7 officers (severe bottleneck)
+        •        Event logging system
+        •        SMS notification system
+Process Flow (7 Steps)
+Step 1: Capture → Cameras capture violation 24/7
+Step 2: Validate → Officers manually validate (MUST be same day)
+        •        Problem: Only 2 computers for 7 officers
+        •        Result: Massive backlog; 95% violations never processed
+Step 3: Sent → Confirmation letter sent to offender
+Step 4: Confirm → Offender must respond within 8 days
+Step 5: Billed → Payment code sent via SMS
+Step 6: Blocked → Vehicle blocked if no payment within 15 days (enforcement)
+Step 7: Paid → Fine paid; violation closed"
+Increasing Processing Capacity Related Goals,Increase processing capacity,Add more available hours to resources,
+,,,
+Increasing Processing Capacity Related Goals,Increase production capacity slightly and reduce waste time,Decrease processing time,"Setting: Hungarian assembly and engineering company producing customized factory units with CNC production line (5 programmers, 6 CNC operators, 2 cutting operators, 1 technologist per shift)
+Resources: 1 technologist (decision-maker), 2 cutting operators, 5 programmers (CAM program writers), 6 CNC operators (8 CNC machines available)
+Process Flow
+Step 1: Technologist Process Decision
+Actors: 1 technologist operator per shift
+Activities:
+        1        Receive customer order for customized factory unit
+        2        Analyze order specifications and requirements
+        3        Decide sequence of required manufacturing processes
+        4        Determine cutting specifications needed
+        5        Decide which CAM programs required
+        6        Communicate requirements to cutting plant and programming department
+        7        Prioritize job sequence for production line
+Duration: Variable, depends on order complexity
+Step 2: Cutting Plant Process
+Actors: 2 operators per shift
+Activities:
+        1        Receive raw material specifications from technologist
+        2        Transport raw materials to cutting machine
+        3        Set up cutting machine for required dimensions
+        4        Cut raw materials to exact dimensions specified
+        5        Transport cut materials to staging area
+        6        Stack cut materials for CNC preparation
+        7        Walk between machines and staging areas
+        8        Document completed cuts
+Duration: Per piece - 2.95 minutes for radiography equivalent (parallel activity)
+Output: Raw materials cut to exact dimensions, ready for CNC milling
+Non-Value-Added Activities: Walking time between cutting machine and staging area
+Step 3: Programming Department - CAM Program Preparation
+Actors: 5 programmers per shift
+Activities - Path A (Programmers write programs):
+        1        Receive CAM program requirements from technologist
+        2        Analyze cutting specifications
+        3        Write CAM program code for CNC machines
+        4        Test program syntax and logic
+        5        Save program to shared system
+        6        Document program for CNC operators
+        7        Wait for CNC machine availability
+        8        Queue programs for machines
+Activities - Path B (CNC Operators write programs - 30% of cases):
+        1        CNC operators receive specifications
+        2        Write CAM program at their machine
+        3        Reduces available machine time
+        4        Increases non-productive operator time
+Output: CAM programs ready for CNC machines, either from programmers (70%) or CNC operators (30%)
+Step 4: CNC Milling Plant Process
+Actors: 6 operators managing 8 machines
+Activities:
+        1        Receive cut materials from cutting plant
+        2        Transport materials to assigned CNC machine
+        3        Verify CAM program availability
+        4        If program not ready, WAIT (or write program themselves)
+        5        Load raw material onto CNC machine
+        6        Load required tools into machine tool shelf
+        7        Start CNC milling program execution
+        8        Monitor machine during milling
+        9        Walk to other machines to check status
+        10        Retrieve finished pieces from CNC machine
+        11        Stack finished pieces in staging area
+        12        Transport pieces to next process/quality check
+        13        Clean machine and tool shelf"
+Increasing Processing Capacity Related Goals,Increased the quantity produced per shift,Change resource activity assignments,
+,,,
+Waiting Time Related Goals,Reduce time-consuming call handling,Decrease call arrival rate or event generation rate,"Multinational company in electrification, digitalization, and automation in Lisbon, Portugal operates Human Resources (HR) IT Support Service with 17 members team. 
+Process Focus: Incident Management (IM) - ITIL-based framework
+Resources Involved
+Support Levels & Staff:
+        •        1st Support Level (Dispatching): 2 support agents
+        •        2nd Support Level (Technical Resolution): 10 support experts
+        •        3rd Support Level (Escalation): 4 IT specialists (plus external IT development teams)
+        •        External Participants: IT suppliers/vendors
+        •        Technology: Single IM system for incident logging, management, and ticket tracking
+Most Common Process Paths
+Path 1: Most Probable Path (Desired Outcome)
+        1        Incident arrives via email (94.36% probability)
+        2        1st support level correctly dispatches
+        3        2nd support level solves entirely (66% of cases)
+        4        No customer reopening request (97.01% of cases)
+        5        Ticket closed
+        6        Average time: 276.06 minutes (4.60 hours)
+Path 2: Second Most Probable Path
+        1        Incident arrives via email
+        2        1st support level correctly dispatches
+        3        2nd support level escalates to 3rd support level (34% of cases)
+        4        3rd support level resolves with supplier intervention (5% of escalations)
+        5        Returned to 2nd support level for closure
+        6        No reopening request
+        7        Ticket closed
+        8        Average time: 803.02 minutes (13.38 hours)
+Path 3: Least Probable Paths
+        •        Incidents ending in critical incident procedure (0.13%)
+        •        Incidents ending in rejection (1.55%)"
+Waiting Time Related Goals,Improve time performance,Reduce processing time,
+Waiting Time Related Goals,Reduce processing time,Reduce processing time for any activity,
+,,,
+Increasing Processing Capacity Related Goals,Improve patient access & autonomy,Add more available hours to resources,"Academic Medical Center in Amsterdam operates CT-scan facility (2 scanners, 12,000 scans/year, 8:30 AM-4:45 PM weekdays)
+Problem: Current appointment-only system causes access delays (5.37 days average), requires multiple hospital visits, causes no-shows (2.6%), administrative burden. Want to enable walk-in while maintaining service for appointment-requiring patients.
+Current System: All patients scheduled with appointments. 9 patient types with different requirements (77.48% eligible for walk-in, 9.96% require specific appointments, 12.56% inpatients).
+Resources:
+        •        2 CT scanners (CT1, CT2)
+        •        Lab (capacity: 10 patients, for creatinine testing)
+        •        IV preparation station (capacity: 1)
+        •        Oral contrast preparation area (capacity: 10)
+
+Process Flow (9 Patient Types)
+Type 1-5: Walk-in Eligible Patients (77.48% total)
+Type 1: IV(Intravenous)-Oral60 (19.09%) - Needs IV + 60-min oral contrast:
+        1        Patient arrives at CT facility (walk-in)
+        2        Lab visit (if no recent creatinine test - only 3% of patients, 60 min)
+        3        Creatinine test check - If level too high (6% probability) → rerouted to appointment scheduler
+        4        IV line placement - Nurse places IV (8.85 min average)
+        5        Oral contrast drinking - Start 60 min before scan (deterministic)
+        6        Wait for CT scanner availability
+        7        CT scan (log-normal distribution, 4.5-40 min range)
+        8        Exit
+Type 2: IV-Oral30 (5.04%) - Similar to Type 1 but 30-min oral prep
+Type 3: IV only (15.71%) - IV line + scan
+Type 4: Oral30 (0.34%) - 30-min oral prep + scan
+Type 5: Outpatient no prep (37.30%) - Direct to scan
+
+Type 6-8: Appointment-Required Outpatients (9.96%)
+Type 6: Colonography (1.23%):
+        •        Requires 3-day advance preparation
+        •        Reserved slots: 2-hour blocks
+        •        CT time: 26.8 min average
+Type 7: Puncture (1.43%):
+        •        Requires anesthesia, physician present
+        •        Reserved slots: 5 slots (75 min after optimization)
+        •        CT time: 67.6 min average
+Type 8: Cardiac (7.30%):
+        •        Requires cardiologist present
+        •        Reserved slots: 1 slot (15 min)
+        •        CT time: varies
+
+Type 9: Inpatients (12.56%)
+        •        Arrive pre-prepared from inpatient unit
+        •        Prefer same-day appointments
+        •        Direct to CT scan"
+Improving Resource Utilisation Related Goals,Optimize resource utilization & reduce waste,Adjust/optimise resource schedules,
+Improving Resource Utilisation Related Goals,Optimize resource allocation & capacity,Increase resource available hours,
+,,,
+Increasing Processing Capacity Related Goals,Increase throughput,Add more available hours to the resource schedules,"Educational Dentistry Clinic in Jordan operates Orthodontic and primary diagnosis departments (working hours: 8 AM-4 PM, 5 days/week, closed Wednesdays)
+
+Departments: 7 private clinics (orthodontic, primary diagnosis, periodontics, restorative, surgery, kids, prosthodontics) + emergency Resources:
+        •        2 receptionists (shared across all clinics)
+        •        Orthodontic: 3 orthodontists, 2 treatment rooms
+        •        Primary diagnosis: 3 dentists, 1 treatment room
+        •        Shared: Radiography rooms (panoramic, lateral cephalometric, CT scan, digital periapical), accounting room
+Patient Types: 6% new orthodontic patients, 94% follow-ups; 77% new primary diagnosis patients, 23% follow-ups
+Process Flow
+Orthodontic Clinic Patients
+New Patients (6%):
+        1        Arrive at clinic entrance
+        2        Registration - Receptionist registers new patient, opens file (2.06 min average)
+        3        Preliminary medical examination - Dentist examines, decides radiography type needed (7.98 min)
+        4        Go to radiography room - Patient sent for panoramic + lateral cephalometric OR CT scan
+        5        Radiography performed (3.92 min per type)
+        6        Accounting #1 - Pay for radiography, receive receipt (1.28 min)
+        7        Return to radiography - Give receipt, collect radiographs (sent via network or picked up)
+        8        Return to orthodontist - Dentist diagnoses condition, begins treatment plan (10.2 min)
+        9        Accounting #2 - Pay for dentist treatment
+        10        Make appointment or exit - Schedule next visit or complete treatment
+Follow-up Patients (94%):
+        1        Arrive at clinic
+        2        Registration - Confirm appointment (0.464 min)
+        3        Orthodontist treatment - Direct treatment (10.2 min average, or 20-30 min for orthodontic case placement)
+        4        Accounting - Pay for treatment
+        5        Make appointment or exit
+Special Case: Patients putting orthodontic cases (handled in morning):
+        •        Priority: Highest (need 20-30 min treatment time)
+        •        Current problem: Clinic schedules other patients same time → major congestion
+
+Primary Diagnosis Clinic Patients
+New Patients (77%):
+        1        Arrive at clinic
+        2        Registration - Open new file (2.06 min)
+        3        Preliminary examination - Dentist decides radiography needed (7.98 min)
+        4        Radiography - Digital periapical and/or panoramic (2.95 min)
+        5        Accounting #1 - Pay for radiography
+        6        Return to radiography - Collect radiographs
+        7        Return to dentist - Treatment (15-25 min uniform)
+        8        Accounting #2 - Pay for treatment
+        9        Make appointment or exit
+Follow-up Patients (23%):
+        1        Registration
+        2        Dentist treatment directly
+        3        Accounting
+        4        Exit or make appointment"
+Improving Resource Utilisation Related Goals,Improve resource utilization,Increase/Decrease role working capacity,
+Improving Resource Utilisation Related Goals,Increase receptionist utilization,Increase/Decrease resources,

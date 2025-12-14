@@ -26,9 +26,11 @@ import {
   FileText,
   Copy,
   Database,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import * as XLSX from 'xlsx';
 
 interface Prompt {
   id: string;
@@ -51,6 +53,8 @@ interface TestRun {
   response?: string;
   groundTruthMatch?: 'good' | 'bad' | 'neutral' | null;
   notes?: string;
+  parametersRecommended?: number;
+  correctParameters?: number;
 }
 
 interface TestBatch {
@@ -96,14 +100,22 @@ export default function BulkTestPage() {
     try {
       const response = await fetch('/api/prompts');
       const data = await response.json();
-      setPrompts(data);
 
-      const activePrompt = data.find((p: Prompt) => p.isActive);
-      if (activePrompt && !selectedPrompts.includes(activePrompt.id)) {
-        setSelectedPrompts([activePrompt.id]);
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setPrompts(data);
+
+        const activePrompt = data.find((p: any) => p.isActive);
+        if (activePrompt && !selectedPrompts.includes(activePrompt.id)) {
+          setSelectedPrompts([activePrompt.id]);
+        }
+      } else {
+        console.error('Expected array from API, got:', data);
+        setPrompts([]);
       }
     } catch (error) {
       console.error('Error fetching prompts:', error);
+      setPrompts([]);
     }
   };
 
@@ -281,6 +293,25 @@ export default function BulkTestPage() {
     saveTestBatches(updatedBatches);
   };
 
+  const updateRunMetrics = (runId: string, parametersRecommended: number, correctParameters: number) => {
+    if (!currentBatch) return;
+
+    const updatedRuns = currentBatch.runs.map(run =>
+      run.id === runId
+        ? { ...run, parametersRecommended, correctParameters }
+        : run
+    );
+
+    const updatedBatch = { ...currentBatch, runs: updatedRuns };
+    setCurrentBatch(updatedBatch);
+
+    // Update in saved batches
+    const updatedBatches = testBatches.map(batch =>
+      batch.id === currentBatch.id ? updatedBatch : batch
+    );
+    saveTestBatches(updatedBatches);
+  };
+
   const getStatusIcon = (status: TestRun['status']) => {
     switch (status) {
       case 'pending': return <Clock className="h-4 w-4 text-muted-foreground" />;
@@ -301,31 +332,147 @@ export default function BulkTestPage() {
   const exportResults = () => {
     if (!currentBatch) return;
 
-    const results = currentBatch.runs.map(run => ({
-      Model: run.model,
-      Prompt: run.prompt,
-      Iteration: run.iteration,
-      Status: run.status,
-      Response: run.response || '',
-      'Ground Truth Match': run.groundTruthMatch || '',
-      Notes: run.notes || '',
-      'Execution Time (ms)': run.startTime && run.endTime
-        ? run.endTime.getTime() - run.startTime.getTime()
-        : ''
-    }));
+    const completedRuns = currentBatch.runs.filter(run => run.status === 'completed');
 
-    const csvContent = [
-      Object.keys(results[0]).join(','),
-      ...results.map(row => Object.values(row).map(val => `"${val}"`).join(','))
-    ].join('\n');
+    if (completedRuns.length === 0) {
+      alert('No completed test runs to export');
+      return;
+    }
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${currentBatch.name.replace(/[^a-z0-9]/gi, '_')}_results.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Create Excel data - Simple table with each run as a row
+    const excelData: any[][] = [];
+
+    // Header row
+    const headerRow: any[] = [
+      'Test Run ID',
+      'Model',
+      'Prompt',
+      'Iteration',
+      'Parameters Recommended',
+      'Correct Parameters',
+      'Precision (%)',
+      'Recall',
+      'Response'
+    ];
+    excelData.push(headerRow);
+
+    // Data rows - each test run gets its own row
+    completedRuns.forEach(run => {
+      const precision = (run.parametersRecommended && run.parametersRecommended > 0)
+        ? Math.round((run.correctParameters! / run.parametersRecommended) * 100)
+        : 0;
+
+      excelData.push([
+        run.id,
+        run.model,
+        run.prompt,
+        run.iteration,
+        run.parametersRecommended || 'Not set',
+        run.correctParameters || 'Not set',
+        run.parametersRecommended ? precision : 'N/A',
+        run.correctParameters || 'Not set',
+        run.response || ''
+      ]);
+    });
+
+    // Add summary statistics at the end
+    excelData.push([]);
+    excelData.push(['SUMMARY TABLE']);
+    excelData.push([]);
+
+    // Group by model and prompt for averages
+    const runsWithMetrics = completedRuns.filter(run =>
+      run.parametersRecommended !== undefined && run.correctParameters !== undefined
+    );
+
+    if (runsWithMetrics.length > 0) {
+      // Get unique prompts and models
+      const uniquePrompts = [...new Set(runsWithMetrics.map(run => run.prompt))];
+      const uniqueModels = [...new Set(runsWithMetrics.map(run => run.model))];
+
+      // Create header row: Test Case | Model1 | Model2 | Model3...
+      const summaryHeaderRow = ['Test Case'];
+      uniqueModels.forEach(model => {
+        // Shorten model names for better display
+        const shortModel = model
+          .replace('gpt-4o-mini', 'GPT 4o Mini')
+          .replace('gpt-4o', 'GPT 4o')
+          .replace('gpt-4-turbo', 'GPT 4 Turbo')
+          .replace('gpt-4', 'GPT 4')
+          .replace('gpt-3.5-turbo-16k', 'GPT 3.5 T.16K')
+          .replace('gpt-3.5-turbo', 'GPT 3.5 Turbo');
+        summaryHeaderRow.push(shortModel);
+      });
+      excelData.push(summaryHeaderRow);
+
+      // Group data by prompt and model
+      const groupedData = new Map();
+      runsWithMetrics.forEach(run => {
+        const promptKey = run.prompt;
+        const modelKey = run.model;
+
+        if (!groupedData.has(promptKey)) {
+          groupedData.set(promptKey, new Map());
+        }
+
+        if (!groupedData.get(promptKey).has(modelKey)) {
+          groupedData.get(promptKey).set(modelKey, []);
+        }
+
+        groupedData.get(promptKey).get(modelKey).push(run);
+      });
+
+      // Create data rows for each prompt (test case)
+      uniquePrompts.forEach(prompt => {
+        const row: any[] = [prompt];
+
+        uniqueModels.forEach(model => {
+          const runsForThisCombo = groupedData.get(prompt)?.get(model);
+
+          if (runsForThisCombo && runsForThisCombo.length > 0) {
+            // Calculate average precision for this prompt-model combination
+            const avgPrecision = runsForThisCombo.reduce((sum: number, run: any) => {
+              return sum + (run.parametersRecommended > 0 ? (run.correctParameters / run.parametersRecommended) : 0);
+            }, 0) / runsForThisCombo.length;
+
+            // Show as percentage
+            row.push(`${Math.round(avgPrecision * 100)}%`);
+          } else {
+            row.push('N/A');
+          }
+        });
+
+        excelData.push(row);
+      });
+    }
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+
+    // Auto-size columns
+    const wscols = [
+      { wch: 15 }, // Test Run ID
+      { wch: 15 }, // Model
+      { wch: 20 }, // Prompt
+      { wch: 10 }, // Iteration
+      { wch: 18 }, // Parameters Recommended
+      { wch: 15 }, // Correct Parameters
+      { wch: 12 }, // Precision
+      { wch: 10 }, // Recall
+      { wch: 60 }  // Response
+    ];
+    ws['!cols'] = wscols;
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Test Results');
+
+    // Generate file name with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const fileName = `bulk-test-results-${timestamp}.xlsx`;
+
+    // Save file
+    XLSX.writeFile(wb, fileName);
   };
 
   const copyToClipboard = (text: string) => {
@@ -426,6 +573,19 @@ export default function BulkTestPage() {
     alert(`✅ Retry completed! ${failedRuns.filter(r => r.status === 'completed').length}/${failedRuns.length} tests succeeded.`);
   };
 
+  const deleteBatch = (batchId: string) => {
+    if (!confirm('Are you sure you want to delete this test batch? This action cannot be undone.')) return;
+
+    const updatedBatches = testBatches.filter(batch => batch.id !== batchId);
+    saveTestBatches(updatedBatches);
+
+    // If we're currently viewing the deleted batch, go back to setup
+    if (currentBatch?.id === batchId) {
+      setCurrentBatch(null);
+      setViewMode('setup');
+    }
+  };
+
   if (viewMode === 'analysis' && currentBatch) {
     const completedRuns = currentBatch.runs.filter(run => run.status === 'completed');
     const groupedByModel = completedRuns.reduce((acc, run) => {
@@ -464,9 +624,10 @@ export default function BulkTestPage() {
                 variant="outline"
                 onClick={exportResults}
                 className="gap-2"
+                disabled={!currentBatch || currentBatch.runs.filter(r => r.status === 'completed').length === 0}
               >
                 <Download className="h-4 w-4" />
-                Export CSV
+                Export Excel
               </Button>
             </div>
           </div>
@@ -643,6 +804,49 @@ export default function BulkTestPage() {
                                     <ThumbsDown className="h-3 w-3" />
                                     Poor
                                   </Button>
+                                </div>
+
+                                <div className="flex gap-2 pt-2 border-t">
+                                  <div className="flex items-center gap-1">
+                                    <Label className="text-xs font-medium">Recommended:</Label>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      value={run.parametersRecommended || ''}
+                                      onChange={(e) => {
+                                        e.stopPropagation();
+                                        const recommended = parseInt(e.target.value) || 0;
+                                        updateRunMetrics(run.id, recommended, run.correctParameters || 0);
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
+                                      onFocus={(e) => e.stopPropagation()}
+                                      className="w-16 h-6 text-xs"
+                                      placeholder="0"
+                                    />
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Label className="text-xs font-medium">Correct:</Label>
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      step="0.1"
+                                      value={run.correctParameters || ''}
+                                      onChange={(e) => {
+                                        e.stopPropagation();
+                                        const correct = parseFloat(e.target.value) || 0;
+                                        updateRunMetrics(run.id, run.parametersRecommended || 0, correct);
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
+                                      onFocus={(e) => e.stopPropagation()}
+                                      className="w-16 h-6 text-xs"
+                                      placeholder="0"
+                                    />
+                                  </div>
+                                  {run.parametersRecommended && run.correctParameters !== undefined && (
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                      <span>Precision: {run.parametersRecommended > 0 ? Math.round((run.correctParameters / run.parametersRecommended) * 100) : 0}%</span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -899,6 +1103,17 @@ export default function BulkTestPage() {
                             }}
                           >
                             <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteBatch(batch.id);
+                            }}
+                            className="gap-1 text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
                       </div>
