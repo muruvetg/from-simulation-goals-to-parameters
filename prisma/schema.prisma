@@ -51,6 +51,7 @@ model TestBatch {
   name        String
   testMessage String   @db.Text
   groundTruth String?  @db.Text
+  estimatedGroundTruthParams Int? @default(1)  // For recall calculation
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   runs        TestRun[]
@@ -72,6 +73,8 @@ model TestRun {
   response          String?   @db.Text
   groundTruthMatch  String?   // 'good', 'bad', 'neutral'
   notes             String?   @db.Text
+  parametersRecommended Int?  // Number of parameters recommended by model
+  correctParameters Float?    // Number of correct parameters (can be decimal)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 

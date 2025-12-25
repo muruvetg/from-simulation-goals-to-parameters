@@ -62,8 +62,10 @@ interface TestBatch {
   name: string;
   testMessage: string;
   groundTruth: string;
+  estimatedGroundTruthParams: number;
   createdAt: Date;
   runs: TestRun[];
+  source?: 'localStorage' | 'database';
 }
 
 const MODELS = [
@@ -82,6 +84,7 @@ export default function BulkTestPage() {
   const [iterations, setIterations] = useState(10);
   const [testMessage, setTestMessage] = useState('');
   const [groundTruth, setGroundTruth] = useState('');
+  const [estimatedGroundTruthParams, setEstimatedGroundTruthParams] = useState(1);
   const [testName, setTestName] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
@@ -90,6 +93,7 @@ export default function BulkTestPage() {
   const [currentBatch, setCurrentBatch] = useState<TestBatch | null>(null);
   const [viewMode, setViewMode] = useState<'setup' | 'analysis'>('setup');
   const [selectedRun, setSelectedRun] = useState<TestRun | null>(null);
+  const [showAllBatches, setShowAllBatches] = useState(false);
 
   useEffect(() => {
     fetchPrompts();
@@ -119,11 +123,16 @@ export default function BulkTestPage() {
     }
   };
 
-  const loadTestBatches = () => {
+  const loadTestBatches = async () => {
+    // Load from localStorage
+    const localBatches: TestBatch[] = [];
     const saved = localStorage.getItem('bulk-test-batches');
     if (saved) {
       const batches = JSON.parse(saved).map((b: any) => ({
         ...b,
+        // Add default value for backward compatibility
+        estimatedGroundTruthParams: b.estimatedGroundTruthParams || 1,
+        source: 'localStorage',
         createdAt: new Date(b.createdAt),
         runs: b.runs.map((r: any) => ({
           ...r,
@@ -131,12 +140,58 @@ export default function BulkTestPage() {
           endTime: r.endTime ? new Date(r.endTime) : undefined
         }))
       }));
-      setTestBatches(batches);
+      localBatches.push(...batches);
     }
+
+    // Load from database
+    const databaseBatches: TestBatch[] = [];
+    try {
+      const response = await fetch('/api/test-batches');
+      if (response.ok) {
+        const dbBatches = await response.json();
+        const formattedDbBatches = dbBatches.map((b: any) => ({
+          ...b,
+          source: 'database',
+          estimatedGroundTruthParams: b.estimatedGroundTruthParams || 1,
+          createdAt: new Date(b.createdAt),
+          runs: b.runs.map((r: any) => ({
+            ...r,
+            startTime: r.startTime ? new Date(r.startTime) : undefined,
+            endTime: r.endTime ? new Date(r.endTime) : undefined
+          }))
+        }));
+        databaseBatches.push(...formattedDbBatches);
+      }
+    } catch (error) {
+      console.error('Error loading database batches:', error);
+    }
+
+    // Merge and deduplicate (prefer localStorage over database for same ID)
+    const allBatches = [...localBatches];
+    databaseBatches.forEach(dbBatch => {
+      const existsInLocal = localBatches.some(localBatch => localBatch.id === dbBatch.id);
+      if (!existsInLocal) {
+        allBatches.push(dbBatch);
+      }
+    });
+
+    // Sort by creation date (newest first)
+    allBatches.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    setTestBatches(allBatches);
   };
 
   const saveTestBatches = (batches: TestBatch[]) => {
-    localStorage.setItem('bulk-test-batches', JSON.stringify(batches));
+    try {
+      localStorage.setItem('bulk-test-batches', JSON.stringify(batches));
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.warn('LocalStorage quota exceeded. Changes not saved to localStorage.');
+        alert('⚠️ LocalStorage full! Please save batches to database and manually clear some local data.');
+      } else {
+        console.error('LocalStorage error:', error);
+      }
+    }
     setTestBatches(batches);
   };
 
@@ -170,6 +225,7 @@ export default function BulkTestPage() {
       name: testName || `Test ${new Date().toLocaleString()}`,
       testMessage: testMessage.trim(),
       groundTruth: groundTruth.trim(),
+      estimatedGroundTruthParams: estimatedGroundTruthParams,
       createdAt: new Date(),
       runs: []
     };
@@ -339,58 +395,22 @@ export default function BulkTestPage() {
       return;
     }
 
-    // Create Excel data - Simple table with each run as a row
+    // Create Excel data starting with Summary Table
     const excelData: any[][] = [];
 
-    // Header row
-    const headerRow: any[] = [
-      'Test Run ID',
-      'Model',
-      'Prompt',
-      'Iteration',
-      'Parameters Recommended',
-      'Correct Parameters',
-      'Precision (%)',
-      'Recall',
-      'Response'
-    ];
-    excelData.push(headerRow);
-
-    // Data rows - each test run gets its own row
-    completedRuns.forEach(run => {
-      const precision = (run.parametersRecommended && run.parametersRecommended > 0)
-        ? Math.round((run.correctParameters! / run.parametersRecommended) * 100)
-        : 0;
-
-      excelData.push([
-        run.id,
-        run.model,
-        run.prompt,
-        run.iteration,
-        run.parametersRecommended || 'Not set',
-        run.correctParameters || 'Not set',
-        run.parametersRecommended ? precision : 'N/A',
-        run.correctParameters || 'Not set',
-        run.response || ''
-      ]);
-    });
-
-    // Add summary statistics at the end
-    excelData.push([]);
+    // Start with Summary Table
     excelData.push(['SUMMARY TABLE']);
     excelData.push([]);
 
-    // Group by model and prompt for averages
-    const runsWithMetrics = completedRuns.filter(run =>
-      run.parametersRecommended !== undefined && run.correctParameters !== undefined
-    );
+    // Include all completed runs (treat missing values as 0)
+    const runsWithMetrics = completedRuns;
 
     if (runsWithMetrics.length > 0) {
       // Get unique prompts and models
       const uniquePrompts = [...new Set(runsWithMetrics.map(run => run.prompt))];
       const uniqueModels = [...new Set(runsWithMetrics.map(run => run.model))];
 
-      // Create header row: Test Case | Model1 | Model2 | Model3...
+      // Create header row: Test Case | Model1 Precision | Model1 Recall | Model1 F1 | Model2 Precision | Model2 Recall | Model2 F1...
       const summaryHeaderRow = ['Test Case'];
       uniqueModels.forEach(model => {
         // Shorten model names for better display
@@ -401,7 +421,9 @@ export default function BulkTestPage() {
           .replace('gpt-4', 'GPT 4')
           .replace('gpt-3.5-turbo-16k', 'GPT 3.5 T.16K')
           .replace('gpt-3.5-turbo', 'GPT 3.5 Turbo');
-        summaryHeaderRow.push(shortModel);
+        summaryHeaderRow.push(`${shortModel} P`);
+        summaryHeaderRow.push(`${shortModel} R`);
+        summaryHeaderRow.push(`${shortModel} F1`);
       });
       excelData.push(summaryHeaderRow);
 
@@ -432,12 +454,29 @@ export default function BulkTestPage() {
           if (runsForThisCombo && runsForThisCombo.length > 0) {
             // Calculate average precision for this prompt-model combination
             const avgPrecision = runsForThisCombo.reduce((sum: number, run: any) => {
-              return sum + (run.parametersRecommended > 0 ? (run.correctParameters / run.parametersRecommended) : 0);
+              const parametersRecommended = run.parametersRecommended || 0;
+              const correctParameters = run.correctParameters || 0;
+              return sum + (parametersRecommended > 0 ? (correctParameters / parametersRecommended) : 0);
             }, 0) / runsForThisCombo.length;
 
-            // Show as percentage
-            row.push(`${Math.round(avgPrecision * 100)}%`);
+            // Calculate average recall for this prompt-model combination
+            const avgRecall = runsForThisCombo.reduce((sum: number, run: any) => {
+              const correctParameters = run.correctParameters || 0;
+              return sum + (correctParameters / currentBatch.estimatedGroundTruthParams);
+            }, 0) / runsForThisCombo.length;
+
+            // Calculate average F1-Score for this prompt-model combination
+            const avgF1Score = (avgPrecision > 0 && avgRecall > 0)
+              ? (2 * avgPrecision * avgRecall) / (avgPrecision + avgRecall)
+              : 0;
+
+            // Add precision, recall, and F1-Score as decimals
+            row.push(Math.round(avgPrecision * 100) / 100);
+            row.push(Math.round(avgRecall * 100) / 100);
+            row.push(Math.round(avgF1Score * 100) / 100);
           } else {
+            row.push('N/A');
+            row.push('N/A');
             row.push('N/A');
           }
         });
@@ -445,6 +484,61 @@ export default function BulkTestPage() {
         excelData.push(row);
       });
     }
+
+    // Add Individual Test Cases section
+    excelData.push([]);
+    excelData.push([]);
+    excelData.push(['INDIVIDUAL TEST CASES']);
+    excelData.push([]);
+
+    // Header row for individual test cases
+    const individualHeaderRow: any[] = [
+      'Test Run ID',
+      'Model',
+      'Prompt',
+      'Iteration',
+      'Parameters Recommended',
+      'Correct Parameters',
+      'Precision (%)',
+      'Recall (%)',
+      'F1-Score (%)',
+      'Response'
+    ];
+    excelData.push(individualHeaderRow);
+
+    // Data rows - each test run gets its own row
+    completedRuns.forEach(run => {
+      // Treat undefined/null values as 0
+      const parametersRecommended = run.parametersRecommended || 0;
+      const correctParameters = run.correctParameters || 0;
+
+      // Calculate precision: TP / (TP + FP)
+      const precision = parametersRecommended > 0
+        ? (correctParameters / parametersRecommended)
+        : 0;
+
+      // Calculate recall: TP / (TP + FN)
+      // Use the user-provided estimated ground truth parameters count
+      const recall = (correctParameters / currentBatch.estimatedGroundTruthParams);
+
+      // Calculate F1-Score: 2 * (precision * recall) / (precision + recall)
+      const f1Score = (precision > 0 && recall > 0)
+        ? (2 * precision * recall) / (precision + recall)
+        : 0;
+
+      excelData.push([
+        run.id,
+        run.model,
+        run.prompt,
+        run.iteration,
+        parametersRecommended,
+        correctParameters,
+        Math.round(precision * 100),
+        Math.round(recall * 100),
+        Math.round(f1Score * 100),
+        run.response || ''
+      ]);
+    });
 
     // Create workbook and worksheet
     const wb = XLSX.utils.book_new();
@@ -460,6 +554,7 @@ export default function BulkTestPage() {
       { wch: 15 }, // Correct Parameters
       { wch: 12 }, // Precision
       { wch: 10 }, // Recall
+      { wch: 12 }, // F1-Score
       { wch: 60 }  // Response
     ];
     ws['!cols'] = wscols;
@@ -488,6 +583,7 @@ export default function BulkTestPage() {
           name: batch.name,
           testMessage: batch.testMessage,
           groundTruth: batch.groundTruth,
+          estimatedGroundTruthParams: batch.estimatedGroundTruthParams,
           runs: batch.runs
         }),
       });
@@ -573,16 +669,47 @@ export default function BulkTestPage() {
     alert(`✅ Retry completed! ${failedRuns.filter(r => r.status === 'completed').length}/${failedRuns.length} tests succeeded.`);
   };
 
-  const deleteBatch = (batchId: string) => {
-    if (!confirm('Are you sure you want to delete this test batch? This action cannot be undone.')) return;
+  const deleteBatchFromDatabase = async (batchId: string) => {
+    try {
+      const response = await fetch(`/api/test-batches?id=${batchId}`, {
+        method: 'DELETE',
+      });
 
-    const updatedBatches = testBatches.filter(batch => batch.id !== batchId);
-    saveTestBatches(updatedBatches);
+      if (response.ok) {
+        const result = await response.json();
+        alert(`✅ ${result.message}`);
+        // Reload batches from database
+        await loadTestBatches();
+        // If we're currently viewing the deleted batch, go back to setup
+        if (currentBatch?.id === batchId) {
+          setCurrentBatch(null);
+          setViewMode('setup');
+        }
+      } else {
+        const error = await response.json();
+        alert(`❌ Failed to delete: ${error.error}\n${error.details || ''}`);
+      }
+    } catch (error) {
+      console.error('Error deleting batch from database:', error);
+      alert('❌ Failed to delete batch from database');
+    }
+  };
 
-    // If we're currently viewing the deleted batch, go back to setup
-    if (currentBatch?.id === batchId) {
-      setCurrentBatch(null);
-      setViewMode('setup');
+  const deleteBatch = async (batch: TestBatch) => {
+    if (!confirm(`Are you sure you want to delete "${batch.name}"? This action cannot be undone.`)) return;
+
+    if (batch.source === 'database') {
+      // Delete from database
+      await deleteBatchFromDatabase(batch.id);
+    } else {
+      // Delete from localStorage
+      const updatedBatches = testBatches.filter(b => b.id !== batch.id);
+      saveTestBatches(updatedBatches);
+      // If we're currently viewing the deleted batch, go back to setup
+      if (currentBatch?.id === batch.id) {
+        setCurrentBatch(null);
+        setViewMode('setup');
+      }
     }
   };
 
@@ -707,6 +834,32 @@ export default function BulkTestPage() {
                   <p className="text-sm bg-muted p-3 rounded-md mt-1">{currentBatch.groundTruth}</p>
                 </div>
               )}
+              <div>
+                <Label className="text-sm font-medium">Estimated Ground Truth Parameters:</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={currentBatch.estimatedGroundTruthParams}
+                    onChange={(e) => {
+                      const newValue = Math.max(1, parseInt(e.target.value) || 1);
+                      const updatedBatch = { ...currentBatch, estimatedGroundTruthParams: newValue };
+                      setCurrentBatch(updatedBatch);
+
+                      // Update in saved batches
+                      const updatedBatches = testBatches.map(batch =>
+                        batch.id === currentBatch.id ? updatedBatch : batch
+                      );
+                      saveTestBatches(updatedBatches);
+                    }}
+                    className="w-20"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Used for calculating recall in Excel export. Changes will affect future exports.
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
@@ -920,15 +1073,33 @@ export default function BulkTestPage() {
               />
             </div>
 
-            <div>
-              <Label htmlFor="groundTruth">Expected Ground Truth (for comparison)</Label>
-              <Textarea
-                id="groundTruth"
-                value={groundTruth}
-                onChange={(e) => setGroundTruth(e.target.value)}
-                placeholder="Enter what you expect the ideal response to contain..."
-                className="min-h-24"
-              />
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="groundTruth">Expected Ground Truth (for comparison)</Label>
+                <Textarea
+                  id="groundTruth"
+                  value={groundTruth}
+                  onChange={(e) => setGroundTruth(e.target.value)}
+                  placeholder="Enter what you expect the ideal response to contain..."
+                  className="min-h-24"
+                />
+              </div>
+              <div>
+                <Label htmlFor="estimatedGroundTruthParams">Estimated Number of Ground Truth Parameters</Label>
+                <Input
+                  id="estimatedGroundTruthParams"
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={estimatedGroundTruthParams}
+                  onChange={(e) => setEstimatedGroundTruthParams(Math.max(1, parseInt(e.target.value) || 1))}
+                  placeholder="e.g., 1"
+                  className="w-32"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Used for calculating recall: TP / (TP + FN). Estimate how many total relevant parameters exist in the ground truth.
+                </p>
+              </div>
             </div>
 
             <div>
@@ -1055,11 +1226,37 @@ export default function BulkTestPage() {
         {testBatches.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Previous Test Batches</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                <span>Previous Test Batches</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => loadTestBatches()}
+                  className="gap-1"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Refresh
+                </Button>
+              </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-muted-foreground">
+                  {testBatches.length} total test batch{testBatches.length !== 1 ? 'es' : ''}
+                </div>
+                {testBatches.length > 10 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAllBatches(!showAllBatches)}
+                    className="gap-1"
+                  >
+                    {showAllBatches ? 'Show Less' : `Show All (${testBatches.length})`}
+                  </Button>
+                )}
+              </div>
               <div className="space-y-2">
-                {testBatches.map((batch) => {
+                {(showAllBatches ? testBatches : testBatches.slice(0, 10)).map((batch) => {
                   const completed = batch.runs.filter(r => r.status === 'completed').length;
                   const total = batch.runs.length;
 
@@ -1076,7 +1273,14 @@ export default function BulkTestPage() {
                             setViewMode('analysis');
                           }}
                         >
-                          <h3 className="font-medium">{batch.name}</h3>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-medium">{batch.name}</h3>
+                            {batch.source && (
+                              <Badge variant={batch.source === 'database' ? 'default' : 'secondary'} className="text-xs">
+                                {batch.source === 'database' ? 'DB' : 'Local'}
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">
                             {batch.createdAt.toLocaleString()} • {completed}/{total} completed
                           </p>
@@ -1109,7 +1313,7 @@ export default function BulkTestPage() {
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              deleteBatch(batch.id);
+                              deleteBatch(batch);
                             }}
                             className="gap-1 text-red-500 hover:text-red-700"
                           >

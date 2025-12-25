@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     body = await request.json();
     console.log('Received request body:', JSON.stringify(body, null, 2));
 
-    const { name, testMessage, groundTruth, runs } = body;
+    const { name, testMessage, groundTruth, estimatedGroundTruthParams, runs } = body;
 
     // Validate required fields
     if (!name || !testMessage) {
@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
         name: name.toString(),
         testMessage: testMessage.toString(),
         groundTruth: groundTruth ? groundTruth.toString() : null,
+        estimatedGroundTruthParams: estimatedGroundTruthParams ? Number(estimatedGroundTruthParams) : 1,
         runs: runs.length > 0 ? {
           create: runs.map((run: any) => ({
             sessionId: run.sessionId ? run.sessionId.toString() : null,
@@ -77,7 +78,9 @@ export async function POST(request: NextRequest) {
             error: run.error ? run.error.toString() : null,
             response: run.response ? run.response.toString() : null,
             groundTruthMatch: run.groundTruthMatch ? run.groundTruthMatch.toString() : null,
-            notes: run.notes ? run.notes.toString() : null
+            notes: run.notes ? run.notes.toString() : null,
+            parametersRecommended: run.parametersRecommended ? Number(run.parametersRecommended) : null,
+            correctParameters: run.correctParameters ? Number(run.correctParameters) : null
           }))
         } : undefined
       },
@@ -101,6 +104,57 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Failed to create test batch',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/test-batches?id=xxx - Delete test batch by ID
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const batchId = searchParams.get('id');
+
+    if (!batchId) {
+      return NextResponse.json(
+        { error: 'Missing batch ID', details: 'id parameter is required' },
+        { status: 400 }
+      );
+    }
+
+    // Delete test batch (cascade will delete associated runs)
+    const deletedBatch = await prisma.testBatch.delete({
+      where: { id: batchId },
+      include: {
+        runs: true,
+        _count: {
+          select: { runs: true }
+        }
+      }
+    });
+
+    console.log(`Test batch deleted successfully: ${batchId}`);
+    return NextResponse.json({
+      success: true,
+      deletedBatch,
+      message: `Deleted batch "${deletedBatch.name}" with ${deletedBatch._count.runs} test runs`
+    });
+
+  } catch (error) {
+    console.error('Error deleting test batch:', error);
+
+    if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
+      return NextResponse.json(
+        { error: 'Test batch not found', details: 'The specified batch ID does not exist' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error: 'Failed to delete test batch',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
